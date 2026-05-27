@@ -618,8 +618,11 @@ function rCarga(){
   else{const _crExp4=S.db.find(e=>e.id===cr.expId);c=`<div style="background:var(--ib);border:.5px solid var(--ib2);border-radius:8px;padding:7px 11px;margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="width:7px;height:7px;border-radius:50%;background:${_crExp4?.rol==='Actor'?cD('green'):cD('orange')};flex-shrink:0"></span><p style="font-size:12px;font-weight:500;color:var(--is);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_crExp4?.car||''}</p></div><div class="g2" style="gap:9px"><button class="bb${cr.suj==='propio'?' on':''}" onclick="S.cr.suj='propio';render()"><i class="ti ti-user bico"></i><span class="blbl">Para mí</span></button><button class="bb${cr.suj==='contraparte'?' on':''}" onclick="S.cr.suj='contraparte';render()"><i class="ti ti-users bico"></i><span class="blbl">Contraparte</span></button></div><button class="cta" style="margin-top:12px;background:${cr.suj?'var(--gb)':'var(--bs)'};color:${cr.suj?'var(--gs)':'var(--tt)'}" ${cr.suj?'':'disabled'} onclick="guardarCR()"><i class="ti ti-check"></i> Guardar</button>`;}
   return`${hd}${prog}<div style="max-width:500px">${c}</div>`;
 }
+let _saving=false;
 async function guardarCR(){
+  if(_saving)return;
   const cr=S.cr;if(!cr.suj||!cr.tipo||!cr.ref||!cr.fecha)return;
+  _saving=true;
   const isA=cr.tipo==='audiencia';
   const body={expediente_id:cr.expId,tipo:cr.tipo,
     descripcion:isA?cr.ref:(TR[cr.ref]?.l||cr.ref),
@@ -632,11 +635,12 @@ async function guardarCR(){
     S.cr={paso:1,tipo:'',ref:'',fecha:'',suj:'',_cf:'',expId:'',_busqExp:''};
     toast('Evento guardado');go('panel');
   }catch(e){toast('Error: '+e.message);}
+  finally{_saving=false;}
 }
 
 function rExp(){
   const fil=S.busq.trim()?S.db.filter(e=>e.car.toLowerCase().includes(S.busq.toLowerCase())||e.cuij.includes(S.busq)):S.db;
-  const form=S.formExp?`<div class="card" style="margin-bottom:10px;border-color:var(--ib2)"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><p style="font-size:14px;font-weight:600;margin:0">Nuevo expediente</p><button class="btn" onclick="S.formExp=false;render()" style="padding:4px 8px"><i class="ti ti-x"></i></button></div><div style="display:grid;gap:9px"><div><span class="lbl">CUIJ</span><input class="inp" type="text" placeholder="21-XXXXXXXX-X" value="${S.ne.cuij}" oninput="S.ne.cuij=this.value"></div><div><span class="lbl">Carátula</span><input class="inp" type="text" placeholder="APELLIDO c/ Empresa s/ Causa" value="${S.ne.car}" oninput="S.ne.car=this.value"></div><div><span class="lbl">Rol</span><select class="sel" onchange="S.ne.rol=this.value"><option${S.ne.rol!=="Demandado"?" selected":""}>Actor</option><option${S.ne.rol==="Demandado"?" selected":""}>Demandado</option></select></div><div class="g2"><div><span class="lbl">Etapa procesal</span><select class="sel" onchange="S.ne.etapa=this.value">${ETAPAS.map(e=>`<option value="${e.v}"${S.ne.etapa===e.v?" selected":""}>${e.l}</option>`).join('')}</select></div><div><span class="lbl">Monto reclamado ($)</span><input class="inp" type="number" placeholder="0" value="${S.ne.monto}" oninput="S.ne.monto=this.value"></div></div>
+  const form=S.formExp?`<div class="card" style="margin-bottom:10px;border-color:var(--ib2)"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><p style="font-size:14px;font-weight:600;margin:0">Nuevo expediente</p><button class="btn" onclick="S.formExp=false;render()" style="padding:4px 8px"><i class="ti ti-x"></i><span class="ti-fb">✕</span></button></div><div style="display:grid;gap:9px"><div><span class="lbl">CUIJ</span><input class="inp" type="text" placeholder="21-XXXXXXXX-X" value="${S.ne.cuij}" oninput="S.ne.cuij=this.value"></div><div><span class="lbl">Carátula</span><input class="inp" type="text" placeholder="APELLIDO c/ Empresa s/ Causa" value="${S.ne.car}" oninput="S.ne.car=this.value"></div><div><span class="lbl">Rol</span><select class="sel" onchange="S.ne.rol=this.value"><option${S.ne.rol!=="Demandado"?" selected":""}>Actor</option><option${S.ne.rol==="Demandado"?" selected":""}>Demandado</option></select></div><div class="g2"><div><span class="lbl">Etapa procesal</span><select class="sel" onchange="S.ne.etapa=this.value">${ETAPAS.map(e=>`<option value="${e.v}"${S.ne.etapa===e.v?" selected":""}>${e.l}</option>`).join('')}</select></div><div><span class="lbl">Monto reclamado ($)</span><input class="inp" type="number" placeholder="0" value="${S.ne.monto}" oninput="S.ne.monto=this.value"></div></div>
 <div><span class="lbl">Ciudad / Sede judicial</span><select class="sel" onchange="S.ne.ciudad=this.value;S.ne.trNom='';S.ne.trJuez='';S.ne.trSec='';S.ne.trEmail='';S.ne.trTel='';render()"><option value="">Seleccionar ciudad...</option>${CIUDADES.map(c=>`<option value="${c}"${S.ne.ciudad===c?'selected':''}>${c} — ${SEDES[c]?.dist}</option>`).join('')}</select></div>
 ${S.ne.ciudad&&SEDES[S.ne.ciudad]?`<div><span class="lbl">Tribunal</span><select class="sel" onchange="(function(v){const t=SEDES[S.ne.ciudad].tribunales[parseInt(v)];S.ne.trNom=t.nom;S.ne.trJuez=t.juez;S.ne.trSec=t.sec;S.ne.trEmail=t.email;S.ne.trTel=t.tel;})(this.value);render()"><option value="">Seleccionar tribunal...</option>${SEDES[S.ne.ciudad].tribunales.map((t,i)=>`<option value="${i}">${t.fuero} · ${t.nom} — ${t.juez}</option>`).join('')}</select></div>
 ${S.ne.trJuez?`<div class="rbox"><div class="rr"><span style="font-size:11px;color:var(--tt)">Juez/a</span><span style="font-size:12px;font-weight:500">${S.ne.trJuez}</span></div><div class="rr"><span style="font-size:11px;color:var(--tt)">Secretario/a</span><span style="font-size:12px">${S.ne.trSec}</span></div><div class="rr"><span style="font-size:11px;color:var(--tt)">Email</span><a href="mailto:${S.ne.trEmail}" style="font-size:11px;color:var(--is)">${S.ne.trEmail}</a></div></div>`:''}`:``}<div class="g2"><div><span class="lbl">Nombre del cliente</span><input class="inp" type="text" placeholder="Juan García" value="${S.ne.cliente||''}" oninput="S.ne.cliente=this.value"></div><div><span class="lbl">Teléfono del cliente</span><input class="inp" type="tel" placeholder="+54 342 000-0000" value="${S.ne.clienteTel||''}" oninput="S.ne.clienteTel=this.value"></div></div>
@@ -655,7 +659,7 @@ ${(exp.cliente||exp.folio)?`<div class="rbox" style="margin-bottom:10px"><div st
 ${exp.monto||exp.montoAcordado?`<div class="rbox" style="margin-bottom:10px"><div style="display:flex;gap:12px;flex-wrap:wrap">${exp.monto?`<div style="flex:1"><p style="font-size:10px;color:var(--tt);margin:0">Monto reclamado</p><p style="font-size:18px;font-weight:700;margin:0;color:var(--is)">$${Number(exp.monto).toLocaleString('es-AR',{minimumFractionDigits:2})}</p></div>`:''}${exp.montoAcordado?`<div style="flex:1"><p style="font-size:10px;color:var(--tt);margin:0">Monto acordado</p><p style="font-size:18px;font-weight:700;margin:0;color:var(--gs)">$${Number(exp.montoAcordado).toLocaleString('es-AR',{minimumFractionDigits:2})}</p></div>`:''}</div></div>`:''}
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span class="sec" style="margin:0">Etapa</span><select class="sel" style="width:auto;font-size:11px;padding:3px 7px" onchange="cambiarEtapa('${exp.id}',this.value)" onclick="event.stopPropagation()">${ETAPAS.map(e=>`<option value="${e.v}"${exp.etapa===e.v?'selected':''}>${e.l}</option>`).join('')}</select></div>
     <span class="sec">Eventos (${exp.evs.length})</span>
-    ${exp.evs.map(ev=>{if(ev.tipo==='audiencia'){const dl=dL(new Date(ev.fecha));return`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:.5px solid var(--bt)"><span class="dot" style="background:${cD('green')}"></span><span style="font-size:13px;flex:1">${ev.desc}</span><span style="font-size:12px;color:var(--ts)">${fmt(new Date(ev.fecha))}</span><span style="font-size:11px;color:${dl<=3&&dl>=0?cT('orange'):'var(--tt)'}">${dlb(dl)}</span><button class="btn bdng" onclick="delEv('${exp.id}','${ev.id}')" style="padding:2px 6px"><i class="ti ti-x"></i></button></div>`}const dl=dL(new Date(ev.c.venc)),reb=ev.suj==='contraparte'&&dl<0;return`<div style="padding:8px 0;border-bottom:.5px solid var(--bt)"><div style="display:flex;gap:8px;align-items:flex-start"><span class="dot" style="background:${cD(ev.suj==='propio'?'orange':'blue')};margin-top:5px"></span><div style="flex:1;min-width:0"><div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center"><span style="font-size:12px;font-weight:500">${TR[ev.tr]?.l}</span><span class="bdg" style="background:var(--bs);color:var(--tt)">${TR[ev.tr]?.cat}</span>${reb?`<span class="bdg" style="background:var(--db);color:var(--ds)">Acusar rebeldía</span>`:''}${ev.suj==='contraparte'&&!reb?`<span class="bdg" style="background:var(--ib);color:var(--is)">Contraparte</span>`:''}</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:5px"><div><p style="font-size:9px;color:var(--tt);margin:0">Día de nota</p><p style="font-size:11px;font-weight:500;margin:0">${fmt(ev.c.nota)}</p></div><div><p style="font-size:9px;color:var(--tt);margin:0">Vencimiento</p><p style="font-size:11px;font-weight:500;margin:0;color:${reb?cT('red'):cT('orange')}">${fmt(ev.c.venc)}</p></div><div><p style="font-size:9px;color:var(--tt);margin:0">Gracia 09:00</p><p style="font-size:11px;color:var(--tt);margin:0">${fmt(ev.c.gr)}</p></div></div></div><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end"><span style="font-size:10px;color:${reb?cT('red'):dl<=3&&dl>=0?cT('orange'):'var(--tt)'}">${dlb(dl)}</span><button class="btn bdng" onclick="delEv('${exp.id}','${ev.id}')" style="padding:2px 6px"><i class="ti ti-x"></i></button></div></div></div>`}).join('')}
+    ${exp.evs.map(ev=>{if(ev.tipo==='audiencia'){const dl=dL(new Date(ev.fecha));return`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:.5px solid var(--bt)"><span class="dot" style="background:${cD('green')}"></span><span style="font-size:13px;flex:1">${ev.desc}</span><span style="font-size:12px;color:var(--ts)">${fmt(new Date(ev.fecha))}</span><span style="font-size:11px;color:${dl<=3&&dl>=0?cT('orange'):'var(--tt)'}">${dlb(dl)}</span><button class="btn bdng" onclick="delEv('${exp.id}','${ev.id}')" style="padding:2px 6px"><i class="ti ti-x"></i><span class="ti-fb">✕</span></button></div>`}const dl=dL(new Date(ev.c.venc)),reb=ev.suj==='contraparte'&&dl<0;return`<div style="padding:8px 0;border-bottom:.5px solid var(--bt)"><div style="display:flex;gap:8px;align-items:flex-start"><span class="dot" style="background:${cD(ev.suj==='propio'?'orange':'blue')};margin-top:5px"></span><div style="flex:1;min-width:0"><div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center"><span style="font-size:12px;font-weight:500">${TR[ev.tr]?.l}</span><span class="bdg" style="background:var(--bs);color:var(--tt)">${TR[ev.tr]?.cat}</span>${reb?`<span class="bdg" style="background:var(--db);color:var(--ds)">Acusar rebeldía</span>`:''}${ev.suj==='contraparte'&&!reb?`<span class="bdg" style="background:var(--ib);color:var(--is)">Contraparte</span>`:''}</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:5px"><div><p style="font-size:9px;color:var(--tt);margin:0">Día de nota</p><p style="font-size:11px;font-weight:500;margin:0">${fmt(ev.c.nota)}</p></div><div><p style="font-size:9px;color:var(--tt);margin:0">Vencimiento</p><p style="font-size:11px;font-weight:500;margin:0;color:${reb?cT('red'):cT('orange')}">${fmt(ev.c.venc)}</p></div><div><p style="font-size:9px;color:var(--tt);margin:0">Gracia 09:00</p><p style="font-size:11px;color:var(--tt);margin:0">${fmt(ev.c.gr)}</p></div></div></div><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end"><span style="font-size:10px;color:${reb?cT('red'):dl<=3&&dl>=0?cT('orange'):'var(--tt)'}">${dlb(dl)}</span><button class="btn bdng" onclick="delEv('${exp.id}','${ev.id}')" style="padding:2px 6px"><i class="ti ti-x"></i><span class="ti-fb">✕</span></button></div></div></div>`}).join('')}
     <div class="g2" style="margin-top:9px;gap:6px"><button class="btn" onclick="startEV('${exp.id}')" style="justify-content:center"><i class="ti ti-plus"></i> Evento</button><button class="btn" onclick="S.hist.expId='${exp.id}';S.hist.fil='todo';go('historial');loadExpDetail('${exp.id}')" style="justify-content:center"><i class="ti ti-history"></i> Historial</button></div>
 
       <!-- ESCRITOS -->
@@ -675,7 +679,7 @@ ${exp.monto||exp.montoAcordado?`<div class="rbox" style="margin-bottom:10px"><di
             </div>
             <p style="font-size:11px;color:var(--ts);margin:2px 0 0">${w.desc}</p>
           </div>
-          <button class="btn bdng" onclick="delEscrito('${exp.id}','${w.id}')" style="padding:2px 6px;flex-shrink:0"><i class="ti ti-x"></i></button>
+          <button class="btn bdng" onclick="delEscrito('${exp.id}','${w.id}')" style="padding:2px 6px;flex-shrink:0"><i class="ti ti-x"></i><span class="ti-fb">✕</span></button>
         </div>`).join('')}
       </div>
 
@@ -696,7 +700,7 @@ ${exp.monto||exp.montoAcordado?`<div class="rbox" style="margin-bottom:10px"><di
             </div>
             <p style="font-size:11px;color:var(--ts);margin:2px 0 0">${c2.destinatario}${c2.domicilio?' — '+c2.domicilio:''}</p>
           </div>
-          <button class="btn bdng" onclick="delCedula('${exp.id}','${c2.id}')" style="padding:2px 6px;flex-shrink:0"><i class="ti ti-x"></i></button>
+          <button class="btn bdng" onclick="delCedula('${exp.id}','${c2.id}')" style="padding:2px 6px;flex-shrink:0"><i class="ti ti-x"></i><span class="ti-fb">✕</span></button>
         </div>`).join('')}
       </div>
     <!-- CONCILIACIÓN -->
@@ -971,7 +975,9 @@ function goBack(){
 }
 function startEV(expId){S.ev={step:1,tipo:'',expId:expId||'',tr:'',fecha:'',suj:'',desc:'',_cf:''};S.view='add-event';render()}
 async function saveEv(){
+  if(_saving)return;
   if(!S.ev.suj||!S.ev.expId)return;
+  _saving=true;
   const isA=S.ev.tipo==='audiencia';
   const body={expediente_id:S.ev.expId,tipo:S.ev.tipo,
     descripcion:isA?S.ev.desc:(TR[S.ev.tr]?.l||S.ev.tr),
@@ -984,6 +990,7 @@ async function saveEv(){
     S.ev={step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:''};
     toast('Evento guardado');go('panel');
   }catch(e){toast('Error: '+e.message);}
+  finally{_saving=false;}
 }
 async function saveExp(){
   if(!S.ne.car.trim()){toast('La carátula es requerida');return;}
@@ -1121,7 +1128,7 @@ function rTour(){
             <p style="font-size:17px;font-weight:700;margin:0;color:var(--tp)">${p.titulo}</p>
           </div>
         </div>
-        <button onclick="S.tour=false;S._tourPaso=0;render()" style="background:none;border:none;cursor:pointer;color:var(--tt);font-size:18px;padding:2px;line-height:1;flex-shrink:0"><i class="ti ti-x"></i></button>
+        <button onclick="S.tour=false;S._tourPaso=0;render()" style="background:none;border:none;cursor:pointer;color:var(--tt);font-size:18px;padding:2px;line-height:1;flex-shrink:0"><i class="ti ti-x"></i><span class="ti-fb">✕</span></button>
       </div>
     </div>
     <!-- Dots -->
@@ -1275,7 +1282,7 @@ function rModalEscrito(){
   <div style="background:var(--bp);border-radius:12px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)" onclick="event.stopPropagation()">
     <div style="padding:1rem 1.25rem .75rem;border-bottom:.5px solid var(--bt);display:flex;align-items:center;justify-content:space-between">
       <p style="font-size:15px;font-weight:600;margin:0"><i class="ti ti-file-text" style="color:var(--is);margin-right:6px"></i>Agregar escrito</p>
-      <button onclick="S._modalEscrito=null;render()" style="background:none;border:none;cursor:pointer;color:var(--tt);font-size:18px"><i class="ti ti-x"></i></button>
+      <button onclick="S._modalEscrito=null;render()" style="background:none;border:none;cursor:pointer;color:var(--tt);font-size:18px"><i class="ti ti-x"></i><span class="ti-fb">✕</span></button>
     </div>
     <div style="padding:1rem 1.25rem;display:grid;gap:10px">
       <p style="font-size:11px;color:var(--ts);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${exp.car}</p>
@@ -1307,7 +1314,7 @@ function rModalCedula(){
   <div style="background:var(--bp);border-radius:12px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)" onclick="event.stopPropagation()">
     <div style="padding:1rem 1.25rem .75rem;border-bottom:.5px solid var(--bt);display:flex;align-items:center;justify-content:space-between">
       <p style="font-size:15px;font-weight:600;margin:0"><i class="ti ti-mail" style="color:var(--ps);margin-right:6px"></i>Registrar cédula</p>
-      <button onclick="S._modalCedula=null;render()" style="background:none;border:none;cursor:pointer;color:var(--tt);font-size:18px"><i class="ti ti-x"></i></button>
+      <button onclick="S._modalCedula=null;render()" style="background:none;border:none;cursor:pointer;color:var(--tt);font-size:18px"><i class="ti ti-x"></i><span class="ti-fb">✕</span></button>
     </div>
     <div style="padding:1rem 1.25rem;display:grid;gap:10px">
       <p style="font-size:11px;color:var(--ts);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${exp.car}</p>
@@ -1383,7 +1390,7 @@ function rModalConcil(){
   <div style="background:var(--bp);border-radius:12px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)" onclick="event.stopPropagation()">
     <div style="padding:1rem 1.25rem .75rem;border-bottom:.5px solid var(--bt);display:flex;align-items:center;justify-content:space-between">
       <p style="font-size:15px;font-weight:600;margin:0"><i class="ti ti-handshake" style="color:var(--gs);margin-right:6px"></i>Registrar movimiento conciliatorio</p>
-      <button onclick="S._modalConcil=null;render()" style="background:none;border:none;cursor:pointer;color:var(--tt);font-size:18px"><i class="ti ti-x"></i></button>
+      <button onclick="S._modalConcil=null;render()" style="background:none;border:none;cursor:pointer;color:var(--tt);font-size:18px"><i class="ti ti-x"></i><span class="ti-fb">✕</span></button>
     </div>
     <div style="padding:1rem 1.25rem;display:grid;gap:10px">
       <p style="font-size:11px;color:var(--ts);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${exp.car}</p>
@@ -1779,7 +1786,7 @@ function rBusqGlobal(){
         value="${S._gq||''}" 
         data-sid="gq" oninput="S._gq=this.value;render()" 
         autofocus>
-      ${S._gq?`<button onclick="S._gq='';render()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--tt);font-size:18px"><i class="ti ti-x"></i></button>`:''}
+      ${S._gq?`<button onclick="S._gq='';render()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--tt);font-size:18px"><i class="ti ti-x"></i><span class="ti-fb">✕</span></button>`:''}
     </div>
     ${q.length>0&&q.length<2?`<p style="font-size:12px;color:var(--tt);margin-top:6px">Escribí al menos 2 caracteres para buscar</p>`:''}
   </div>
