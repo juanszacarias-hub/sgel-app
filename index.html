@@ -526,7 +526,7 @@ function lg(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function ls(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 
 
-let S={view:'login',logueado:false,db:[],prof:{nombre:'',email:'',whatsapp:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}},login:{user:'',pass:'',err:''},chgPw:{a:'',n:'',c:'',err:'',ok:false},calM:HOY.getMonth(),calY:HOY.getFullYear(),expId:null,formExp:false,busq:'',ne:{cuij:'',car:'',rol:'Actor',sede:'Distrito 1',etapa:'',monto:'',montoAcordado:'',notas:'',ciudad:'',trNom:'',trJuez:'',trSec:'',trEmail:'',trTel:'',cliente:'',clienteTel:'',folio:''},ev:{step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:''},rptM:HOY.getMonth(),rptY:HOY.getFullYear(),rptExpId:null,calc:{fecha:ds(HOY),tipo:'',custom:5,desde:'nota',cf:'',tab:'plazos',ibm:'',incap:'',edad:45,factor:'1.44',adj:'20'},hist:{expId:null,fil:'todo',busq:''},cr:{paso:1,tipo:'',ref:'',fecha:'',suj:'',expId:'',_cf:''},ref:{busq:'',sec:''},toast:'',tour:false,_tourPaso:0,_alertaClosed:false,panelDias:14,_modalEscrito:null,_modalCedula:null,_modalConcil:null,_navHist:[],_gq:'',dark:false,_modalNuevaAlerta:false,_fna:{titulo:'',desc:'',fecha:'',expId:''},rpw:{step:1,email:'',code:'',pass:'',conf:'',err:'',mostrarCodigo:''}};
+let S={view:'login',logueado:false,db:[],prof:{nombre:'',email:'',whatsapp:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}},login:{user:'',pass:'',err:''},chgPw:{a:'',n:'',c:'',err:'',ok:false},calM:HOY.getMonth(),calY:HOY.getFullYear(),expId:null,formExp:false,busq:'',ne:{cuij:'',car:'',rol:'Actor',sede:'Distrito 1',etapa:'',monto:'',montoAcordado:'',notas:'',ciudad:'',trNom:'',trJuez:'',trSec:'',trEmail:'',trTel:'',cliente:'',clienteTel:'',folio:''},ev:{step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:''},rptM:HOY.getMonth(),rptY:HOY.getFullYear(),rptExpId:null,calc:{fecha:ds(HOY),tipo:'',custom:5,desde:'nota',cf:'',tab:'plazos',ibm:'',incap:'',edad:45,factor:'1.44',adj:'20'},hist:{expId:null,fil:'todo',busq:''},cr:{paso:1,tipo:'',ref:'',fecha:'',suj:'',expId:'',_cf:''},ref:{busq:'',sec:''},toast:'',tour:false,_tourPaso:0,_alertaClosed:false,panelDias:14,_modalEscrito:null,_modalCedula:null,_modalConcil:null,_navHist:[],_gq:'',dark:false,_modalNuevaAlerta:false,_fna:{titulo:'',desc:'',fecha:'',expId:''},rpw:{step:1,email:'',code:'',pass:'',conf:'',err:'',mostrarCodigo:''},_adu:{list:[],loaded:false,form:false,nuevo:{nombre:'',email:'',pass:'',rol:'abogado',err:''}}};
 
 function loadState(){}
 function saveDB(){}
@@ -552,7 +552,7 @@ function art51Pend(){return S.db.filter(exp=>{if(['sentencia','recursos','ejecuc
 function rHdr(){
   const reb=rebs().length,cad=cadInst().length,a51=art51Pend().length,alerts=reb+cad+a51;
   const nm=S.prof.nombre||'Abogado',ini=nm.split(' ').map(w=>w[0]||'').join('').substring(0,2).toUpperCase()||'AB';
-  const nav=[{v:'panel',i:'ti-layout-dashboard',l:'Panel'},{v:'carga',i:'ti-bolt',l:'Carga'},{v:'expedientes',i:'ti-files',l:'Expedientes'},{v:'historial',i:'ti-history',l:'Historial'},{v:'calendario',i:'ti-calendar',l:'Cal.'},{v:'alertas',i:'ti-bell',l:alerts?`Alertas(${alerts})`:'Alertas',d:alerts>0},{v:'reporte',i:'ti-chart-bar',l:'Reporte'},{v:'calculadora',i:'ti-calculator',l:'Calc.'},{v:'stats',i:'ti-chart-pie',l:'Stats'},{v:'referencia',i:'ti-book',l:'CPL'},{v:'busqueda',i:'ti-search',l:''},{v:'guia',i:'ti-map-pin',l:'Guía'},{v:'config',i:'ti-settings',l:''}];
+  const nav=[{v:'panel',i:'ti-layout-dashboard',l:'Panel'},{v:'carga',i:'ti-bolt',l:'Carga'},{v:'expedientes',i:'ti-files',l:'Expedientes'},{v:'historial',i:'ti-history',l:'Historial'},{v:'calendario',i:'ti-calendar',l:'Cal.'},{v:'alertas',i:'ti-bell',l:alerts?`Alertas(${alerts})`:'Alertas',d:alerts>0},{v:'reporte',i:'ti-chart-bar',l:'Reporte'},{v:'calculadora',i:'ti-calculator',l:'Calc.'},{v:'stats',i:'ti-chart-pie',l:'Stats'},{v:'referencia',i:'ti-book',l:'CPL'},{v:'busqueda',i:'ti-search',l:''},{v:'guia',i:'ti-map-pin',l:'Guía'},{v:'config',i:'ti-settings',l:''},...(S._usuariosRol==='admin'?[{v:'admin',i:'ti-users-group',l:'Usuarios'}]:[])];
   return`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.875rem;flex-wrap:wrap;gap:7px;padding-bottom:.875rem;border-bottom:.5px solid var(--bt)"><div><p style="font-size:9px;font-family:var(--fm);color:var(--tt);margin:0;letter-spacing:.1em">SGEL · CPL SANTA FE · v3</p><h1 style="font-size:18px;font-weight:600;margin:0">Guardián Procesal</h1></div><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:5px">
         ${S._navHist.length?`<button onclick="goBack()" title="Volver atrás" style="width:34px;height:34px;border-radius:9px;border:1.5px solid var(--is);background:var(--ib);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--is);flex-shrink:0;box-shadow:0 2px 6px rgba(29,78,216,.15)"><i class="ti ti-arrow-left" style="font-size:18px;font-weight:700"></i><span class="ti-fb" style="font-size:18px;font-weight:700">←</span></button>`:''}
         <div style="display:flex;gap:2px;flex-wrap:wrap">${nav.map(n=>`<button class="nt${S.view===n.v?' on':''}" onclick="go('${n.v}')" style="${n.d?'color:var(--ds)':''}"><i class="ti ${n.i}"></i>${n.l?' '+n.l:''}</button>`).join('')}</div><div style="width:30px;height:30px;border-radius:50%;background:var(--ib);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--is);cursor:pointer;border:.5px solid var(--ib2)" onclick="go('config')">${ini}</div></div><button onclick="S.tour=true;S._tourPaso=0;render()" title="Guía de uso" style="width:30px;height:30px;border-radius:50%;background:var(--bs);border:.5px solid var(--bt);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ts);font-weight:700">?</button>
@@ -2026,6 +2026,45 @@ async function duplicarExp(expId){
     S.expId=exp.id;go('expedientes');
   }catch(e){toast('Error: '+e.message);}
 }
+// ── ADMINISTRACIÓN DE USUARIOS ────────────────────────────────────────────────
+function rAdminUsuarios(){
+  const a=S._adu;
+  if(!a.loaded){loadUsuarios();return`${rHdr()}<span class="sec">Usuarios del estudio</span><div class="rbox" style="text-align:center;padding:2rem"><i class="ti ti-loader-2" style="font-size:28px;color:var(--tt)"></i><p style="color:var(--ts);margin-top:8px">Cargando...</p></div>`;}
+  const rolBdg=r=>{const c={admin:['var(--db)','var(--ds)'],abogado:['var(--ib)','var(--is)'],secretario:['var(--pb)','var(--ps)']}[r]||['var(--bs)','var(--ts)'];return`<span class="bdg" style="background:${c[0]};color:${c[1]}">${r}</span>`;};
+  const formHtml=a.form?`<div class="card" style="border-color:var(--ib2);margin-bottom:10px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem"><p style="font-size:14px;font-weight:600;margin:0"><i class="ti ti-user-plus"></i> Nuevo usuario</p><button class="btn" onclick="S._adu.form=false;render()" style="padding:4px 8px"><i class="ti ti-x"></i><span class="ti-fb">&#x2715;</span></button></div><div style="display:grid;gap:10px"><div class="g2"><div><span class="lbl">Nombre *</span><input class="inp" type="text" placeholder="Dr. Nombre Apellido" value="${a.nuevo.nombre}" oninput="S._adu.nuevo.nombre=this.value"></div><div><span class="lbl">Email *</span><input class="inp" type="email" placeholder="usuario@estudio.com" value="${a.nuevo.email}" oninput="S._adu.nuevo.email=this.value"></div></div><div class="g2"><div><span class="lbl">Contrase&#xF1;a * (m&#xED;n. 6)</span><input class="inp" type="password" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;" value="${a.nuevo.pass}" oninput="S._adu.nuevo.pass=this.value"></div><div><span class="lbl">Rol</span><select class="sel" onchange="S._adu.nuevo.rol=this.value"><option value="abogado"${a.nuevo.rol==='abogado'?' selected':''}>Abogado</option><option value="secretario"${a.nuevo.rol==='secretario'?' selected':''}>Secretario</option><option value="admin"${a.nuevo.rol==='admin'?' selected':''}>Admin</option></select></div></div>${a.nuevo.err?`<p style="font-size:12px;color:var(--ds);padding:6px 10px;background:var(--db);border-radius:6px">${a.nuevo.err}</p>`:''}<button class="bok" onclick="crearUsuario()"><i class="ti ti-user-plus"></i> Crear usuario</button></div></div>`:''
+  return`${rHdr()}<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span class="sec" style="margin:0">Usuarios del estudio</span><div style="display:flex;gap:6px"><button class="btn" onclick="S._adu.loaded=false;loadUsuarios()"><i class="ti ti-refresh"></i></button><button class="btn" onclick="S._adu.form=!S._adu.form;S._adu.nuevo={nombre:'',email:'',pass:'',rol:'abogado',err:''};render()"><i class="ti ti-user-plus"></i> Nuevo usuario</button></div></div>${formHtml}<div class="card" style="padding:0;overflow:hidden">${!a.list.length?`<p style="padding:1.5rem;text-align:center;color:var(--ts);font-size:13px">Sin usuarios registrados</p>`:a.list.map((u,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:${i<a.list.length-1?'.5px solid var(--bt)':'none'};opacity:${u.activo?1:.55}"><div style="width:34px;height:34px;border-radius:50%;background:${u.activo?'var(--ib)':'var(--bs)'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:${u.activo?'var(--is)':'var(--tt)'};flex-shrink:0">${(u.nombre||'??').split(' ').map(w=>w[0]||'').join('').substring(0,2).toUpperCase()}</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap"><p style="font-size:13px;font-weight:500;margin:0">${u.nombre}</p>${rolBdg(u.rol)}${!u.activo?`<span class="bdg" style="background:var(--bs);color:var(--tt)">Inactivo</span>`:''}</div><p style="font-size:11px;color:var(--ts);margin:2px 0 0">${u.email}</p></div><div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><select class="sel" style="font-size:11px;padding:4px 7px;width:auto" onchange="cambiarRolUsuario('${u.id}',this.value)"><option value="abogado"${u.rol==='abogado'?' selected':''}>Abogado</option><option value="secretario"${u.rol==='secretario'?' selected':''}>Secretario</option><option value="admin"${u.rol==='admin'?' selected':''}>Admin</option></select><button onclick="toggleActivoUsuario('${u.id}',${!u.activo})" class="btn" style="font-size:11px;padding:5px 9px;color:${u.activo?'var(--ds)':'var(--gs)'};border-color:${u.activo?'var(--db2)':'var(--gb2)'};background:${u.activo?'var(--db)':'var(--gb)'}">${u.activo?`<i class="ti ti-user-off"></i> Desactivar`:`<i class="ti ti-user-check"></i> Activar`}</button></div></div>`).join('')}</div>`;
+}
+async function loadUsuarios(){
+  try{
+    const r=await api('GET','/usuarios');
+    S._adu.list=r.usuarios||[];S._adu.loaded=true;render();
+  }catch(e){toast('Error al cargar usuarios: '+e.message);}
+}
+async function crearUsuario(){
+  const n=S._adu.nuevo;n.err='';
+  if(!n.nombre.trim()||!n.email.trim()||!n.pass){n.err='Complet&#xE1; todos los campos';render();return;}
+  if(n.pass.length<6){n.err='Contrase&#xF1;a m&#xED;nimo 6 caracteres';render();return;}
+  try{
+    const r=await api('POST','/usuarios',{nombre:n.nombre.trim(),email:n.email.trim(),password:n.pass,rol:n.rol});
+    S._adu.list.push(r.usuario);S._adu.form=false;S._adu.nuevo={nombre:'',email:'',pass:'',rol:'abogado',err:''};
+    render();toast('Usuario creado');
+  }catch(e){n.err=e.message||'Error al crear usuario';render();}
+}
+async function toggleActivoUsuario(id,nuevoEstado){
+  try{
+    const r=await api('PATCH','/usuarios/'+id,{activo:nuevoEstado});
+    const u=S._adu.list.find(x=>x.id===id);if(u){u.activo=r.usuario.activo;}
+    render();toast(nuevoEstado?'Usuario activado':'Usuario desactivado');
+  }catch(e){toast('Error: '+e.message);}
+}
+async function cambiarRolUsuario(id,rol){
+  try{
+    const r=await api('PATCH','/usuarios/'+id,{rol});
+    const u=S._adu.list.find(x=>x.id===id);if(u){u.rol=r.usuario.rol;}
+    render();toast('Rol actualizado');
+  }catch(e){toast('Error: '+e.message);}
+}
+
 function render(){
   document.documentElement.setAttribute('data-theme',S.dark?'dark':'');
   const el=document.getElementById('app');
@@ -2049,6 +2088,7 @@ function render(){
   else if(v==='stats')el.innerHTML=rStats();
   else if(v==='config')el.innerHTML=rCfg();
   else if(v==='add-event')el.innerHTML=rEV();
+  else if(v==='admin')el.innerHTML=S._usuariosRol==='admin'?rAdminUsuarios():rPanel();
   else el.innerHTML=rPanel();
   // Restore cursor in search inputs after DOM replacement
   if(_fid){
