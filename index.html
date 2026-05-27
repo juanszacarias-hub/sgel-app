@@ -185,7 +185,7 @@ async function initApp(){
     const me=await api('GET','/auth/me');
     S.prof.nombre=me.usuario.nombre;S.prof.email=me.usuario.email;
     S._usuarioRol=me.usuario.rol;S._usuarioId=me.usuario.id;S.logueado=true;S._alertaClosed=false;
-    await refreshTodos();go('panel');
+    await loadPreferencias();await refreshTodos();go('panel');
   }catch(e){clearToken();render();}
 }
 // ─────────────────────────────────────────────────────────────────────────────
@@ -530,11 +530,28 @@ let S={view:'login',logueado:false,db:[],prof:{nombre:'',email:'',whatsapp:'',ib
 
 function loadState(){}
 function saveDB(){}
-function saveProf(){
-  const prefs={nombre:S.prof.nombre,email:S.prof.email,whatsapp:S.prof.whatsapp,ibm:S.prof.ibm,ibmFecha:S.prof.ibmFecha,feriaExtra:S.prof.feriaExtra,feriaAnio:S.prof.feriaAnio,notif:S.prof.notif};
+async function saveProf(){
+  const prefs={nombre:S.prof.nombre,email:S.prof.email,whatsapp:S.prof.whatsapp,ibm:S.prof.ibm,ibmFecha:S.prof.ibmFecha,feriaExtra:S.prof.feriaExtra,feriaAnio:S.prof.feriaAnio,notif:S.prof.notif,dark:S.dark};
   localStorage.setItem('sgel_prof_local',JSON.stringify(prefs));
   _feriaExtra=S.prof.feriaExtra||[];
   localStorage.setItem('sgel_dark',S.dark?'1':'0');
+  if(S.logueado){try{await api('PUT','/usuarios/me/preferencias',prefs);}catch(e){}}
+}
+async function loadPreferencias(){
+  try{
+    const r=await api('GET','/usuarios/me/preferencias');
+    const p=r.preferencias||{};
+    if(p.ibm!==undefined)S.prof.ibm=p.ibm;
+    if(p.ibmFecha!==undefined)S.prof.ibmFecha=p.ibmFecha;
+    if(p.feriaExtra){S.prof.feriaExtra=p.feriaExtra;_feriaExtra=p.feriaExtra;}
+    if(p.feriaAnio)S.prof.feriaAnio=p.feriaAnio;
+    if(p.notif)S.prof.notif=Object.assign({},S.prof.notif,p.notif);
+    if(p.dark!==undefined)S.dark=p.dark;
+    if(p.nombre)S.prof.nombre=p.nombre;
+    if(p.whatsapp!==undefined)S.prof.whatsapp=p.whatsapp;
+    localStorage.setItem('sgel_prof_local',JSON.stringify(S.prof));
+    localStorage.setItem('sgel_dark',S.dark?'1':'0');
+  }catch(e){}
 }
 function loadAlertasManuales(){try{return JSON.parse(localStorage.getItem('sgel_alertas_manuales')||'[]');}catch(e){return[];}}
 function saveAlertasManuales(arr){localStorage.setItem('sgel_alertas_manuales',JSON.stringify(arr));}
@@ -568,7 +585,7 @@ async function doLogin(){
     if(!resp.ok)throw new Error(r.error||'Credenciales incorrectas');
     setToken(r.token);S.prof.nombre=r.usuario.nombre;S.prof.email=r.usuario.email;
     S._usuarioRol=r.usuario.rol;S._usuarioId=r.usuario.id;S.logueado=true;S.login.err='';S._alertaClosed=false;
-    await refreshTodos();go('panel');
+    await loadPreferencias();await refreshTodos();go('panel');
   }catch(e){S.login.err=e.message||'Credenciales incorrectas';render();}
 }
 function doLogout(){clearToken();S.logueado=false;S.db=[];S.view='login';S.login={user:'',pass:'',err:''};render();}
