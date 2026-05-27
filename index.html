@@ -526,7 +526,7 @@ function lg(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function ls(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 
 
-let S={view:'login',logueado:false,db:[],prof:{nombre:'',email:'',whatsapp:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}},login:{user:'',pass:'',err:''},chgPw:{a:'',n:'',c:'',err:'',ok:false},calM:HOY.getMonth(),calY:HOY.getFullYear(),expId:null,formExp:false,busq:'',ne:{cuij:'',car:'',rol:'Actor',sede:'Distrito 1',etapa:'',monto:'',montoAcordado:'',notas:'',ciudad:'',trNom:'',trJuez:'',trSec:'',trEmail:'',trTel:'',cliente:'',clienteTel:'',folio:''},ev:{step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:''},rptM:HOY.getMonth(),rptY:HOY.getFullYear(),rptExpId:null,calc:{fecha:ds(HOY),tipo:'',custom:5,desde:'nota',cf:'',tab:'plazos',ibm:'',incap:'',edad:45,factor:'1.44',adj:'20'},hist:{expId:null,fil:'todo',busq:''},cr:{paso:1,tipo:'',ref:'',fecha:'',suj:'',expId:'',_cf:''},ref:{busq:'',sec:''},toast:'',tour:false,_tourPaso:0,_alertaClosed:false,panelDias:14,_modalEscrito:null,_modalCedula:null,_modalConcil:null,_navHist:[],_gq:'',dark:false,_modalNuevaAlerta:false,_fna:{titulo:'',desc:'',fecha:'',expId:''}};
+let S={view:'login',logueado:false,db:[],prof:{nombre:'',email:'',whatsapp:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}},login:{user:'',pass:'',err:''},chgPw:{a:'',n:'',c:'',err:'',ok:false},calM:HOY.getMonth(),calY:HOY.getFullYear(),expId:null,formExp:false,busq:'',ne:{cuij:'',car:'',rol:'Actor',sede:'Distrito 1',etapa:'',monto:'',montoAcordado:'',notas:'',ciudad:'',trNom:'',trJuez:'',trSec:'',trEmail:'',trTel:'',cliente:'',clienteTel:'',folio:''},ev:{step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:''},rptM:HOY.getMonth(),rptY:HOY.getFullYear(),rptExpId:null,calc:{fecha:ds(HOY),tipo:'',custom:5,desde:'nota',cf:'',tab:'plazos',ibm:'',incap:'',edad:45,factor:'1.44',adj:'20'},hist:{expId:null,fil:'todo',busq:''},cr:{paso:1,tipo:'',ref:'',fecha:'',suj:'',expId:'',_cf:''},ref:{busq:'',sec:''},toast:'',tour:false,_tourPaso:0,_alertaClosed:false,panelDias:14,_modalEscrito:null,_modalCedula:null,_modalConcil:null,_navHist:[],_gq:'',dark:false,_modalNuevaAlerta:false,_fna:{titulo:'',desc:'',fecha:'',expId:''},rpw:{step:1,email:'',code:'',pass:'',conf:'',err:'',mostrarCodigo:''}};
 
 function loadState(){}
 function saveDB(){}
@@ -559,7 +559,7 @@ function rHdr(){
     <button onclick="S.dark=!S.dark;saveProf();render()" title="${S.dark?'Modo claro':'Modo oscuro'}" style="width:30px;height:30px;border-radius:50%;background:var(--bs);border:.5px solid var(--bt);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--ts)"><i class="ti ${S.dark?'ti-sun':'ti-moon'}"></i><span class="ti-fb">${S.dark?'☀':'🌙'}</span></button></div></div></div>${S.toast?`<div style="background:var(--gb);color:var(--gs);padding:7px 14px;border-radius:7px;font-size:12px;margin-bottom:10px;border:.5px solid var(--gb2);display:flex;align-items:center;gap:6px"><i class="ti ti-check"></i> ${S.toast}</div>`:''}`;
 }
 
-function rLogin(){return`<div style="min-height:85vh;display:flex;align-items:center;justify-content:center"><div style="width:100%;max-width:360px"><div style="text-align:center;margin-bottom:1.75rem"><div style="width:52px;height:52px;border-radius:12px;background:var(--bs);border:.5px solid var(--bt);display:flex;align-items:center;justify-content:center;margin:0 auto 12px"><i class="ti ti-shield-check" style="font-size:26px;color:var(--ts)"></i></div><p style="font-size:9px;letter-spacing:.12em;font-family:var(--fm);color:var(--tt);margin:0 0 4px">SGEL · SANTA FE · v3</p><h1 style="font-size:22px;font-weight:600;margin:0">Guardián Procesal</h1><p style="font-size:13px;color:var(--ts);margin:5px 0 0">CPL Santa Fe integrado</p></div><div class="card"><div style="display:grid;gap:10px"><div><span class="lbl">Usuario</span><input class="inp" type="text" placeholder="usuario@estudio.com" value="${S.login.user}" oninput="S.login.user=this.value"></div><div><span class="lbl">Contraseña</span><input class="inp" type="password" placeholder="••••••••" value="${S.login.pass}" oninput="S.login.pass=this.value" onkeydown="if(event.key==='Enter')doLogin()"></div>${S.login.err?`<p style="font-size:12px;color:var(--ds);padding:6px 10px;background:var(--db);border-radius:6px">${S.login.err}</p>`:''}<button class="bok" onclick="doLogin()" style="font-size:14px;padding:10px"><i class="ti ti-login"></i> Ingresar</button></div></div><p style="font-size:10px;color:var(--tt);text-align:center;margin-top:14px">v0.5 · ${Object.keys(TR).length} plazos CPL cargados</p></div></div>`}
+function rLogin(){return`<div style="min-height:85vh;display:flex;align-items:center;justify-content:center"><div style="width:100%;max-width:360px"><div style="text-align:center;margin-bottom:1.75rem"><div style="width:52px;height:52px;border-radius:12px;background:var(--bs);border:.5px solid var(--bt);display:flex;align-items:center;justify-content:center;margin:0 auto 12px"><i class="ti ti-shield-check" style="font-size:26px;color:var(--ts)"></i></div><p style="font-size:9px;letter-spacing:.12em;font-family:var(--fm);color:var(--tt);margin:0 0 4px">SGEL · SANTA FE · v3</p><h1 style="font-size:22px;font-weight:600;margin:0">Guardián Procesal</h1><p style="font-size:13px;color:var(--ts);margin:5px 0 0">CPL Santa Fe integrado</p></div><div class="card"><div style="display:grid;gap:10px"><div><span class="lbl">Usuario</span><input class="inp" type="text" placeholder="usuario@estudio.com" value="${S.login.user}" oninput="S.login.user=this.value"></div><div><span class="lbl">Contraseña</span><input class="inp" type="password" placeholder="••••••••" value="${S.login.pass}" oninput="S.login.pass=this.value" onkeydown="if(event.key==='Enter')doLogin()"></div>${S.login.err?`<p style="font-size:12px;color:var(--ds);padding:6px 10px;background:var(--db);border-radius:6px">${S.login.err}</p>`:''}<button class="bok" onclick="doLogin()" style="font-size:14px;padding:10px"><i class="ti ti-login"></i> Ingresar</button><div style="text-align:center;margin-top:4px"><button onclick="S.view='forgot';S.rpw={step:1,email:S.login.user||'',code:'',pass:'',conf:'',err:'',mostrarCodigo:''};render()" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--is);text-decoration:underline;padding:2px 0">&#xBF;Olvidaste tu contrase&#xF1;a?</button></div></div></div><p style="font-size:10px;color:var(--tt);text-align:center;margin-top:14px">v0.5 · ${Object.keys(TR).length} plazos CPL cargados</p></div></div>`}
 async function doLogin(){
   if(!S.login.user.trim()||!S.login.pass.trim()){S.login.err='Ingresá usuario y contraseña.';render();return;}
   try{
@@ -570,6 +570,41 @@ async function doLogin(){
   }catch(e){S.login.err=e.message||'Credenciales incorrectas';render();}
 }
 function doLogout(){clearToken();S.logueado=false;S.db=[];S.view='login';S.login={user:'',pass:'',err:''};render();}
+
+function rForgotPw(){
+  const r=S.rpw;
+  const logo=`<div style="text-align:center;margin-bottom:1.75rem"><div style="width:52px;height:52px;border-radius:12px;background:var(--bs);border:.5px solid var(--bt);display:flex;align-items:center;justify-content:center;margin:0 auto 12px"><i class="ti ti-lock-question" style="font-size:26px;color:var(--ts)"></i><span class="ti-fb" style="font-size:24px">&#x1F512;</span></div><p style="font-size:9px;letter-spacing:.12em;font-family:var(--fm);color:var(--tt);margin:0 0 4px">SGEL · SANTA FE · v3</p><h1 style="font-size:22px;font-weight:600;margin:0">Recuperar acceso</h1></div>`;
+  const volverBtn=`<button onclick="S.rpw.step=1;S.rpw.err='';render()" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--ts);text-decoration:underline;padding:2px 0;text-align:center;width:100%"><i class="ti ti-arrow-left"></i><span class="ti-fb">&#x2190;</span> Volver</button>`;
+
+  if(r.step===1) return`<div style="min-height:85vh;display:flex;align-items:center;justify-content:center"><div style="width:100%;max-width:360px">${logo}<div class="card"><p style="font-size:14px;font-weight:600;margin:0 0 3px">Recuperar contrase&#xF1;a</p><p style="font-size:12px;color:var(--ts);margin:0 0 14px">Ingres&#xE1; tu email y te mostraremos un c&#xF3;digo temporal.</p><div style="display:grid;gap:10px"><div><span class="lbl">Email</span><input class="inp" type="email" placeholder="usuario@estudio.com" value="${r.email}" oninput="S.rpw.email=this.value" onkeydown="if(event.key==='Enter')doForgotPw()"></div>${r.err?`<p style="font-size:12px;color:var(--ds);padding:6px 10px;background:var(--db);border-radius:6px">${r.err}</p>`:''}<button class="bok" onclick="doForgotPw()" style="font-size:14px;padding:10px"><i class="ti ti-send"></i> Obtener c&#xF3;digo</button><button onclick="S.view='login';render()" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--ts);text-decoration:underline;padding:2px 0;text-align:center;width:100%"><i class="ti ti-arrow-left"></i><span class="ti-fb">&#x2190;</span> Volver al login</button></div></div></div></div>`;
+
+  return`<div style="min-height:85vh;display:flex;align-items:center;justify-content:center"><div style="width:100%;max-width:360px">${logo}<div class="card"><p style="font-size:14px;font-weight:600;margin:0 0 3px">Ingres&#xE1; el c&#xF3;digo</p><p style="font-size:12px;color:var(--ts);margin:0 0 10px">C&#xF3;digo para <strong>${r.email}</strong>:</p>${r.mostrarCodigo?`<div style="background:var(--wb);border:.5px solid var(--wb2);border-radius:8px;padding:12px;text-align:center;margin-bottom:12px"><p style="font-size:10px;color:var(--ws);margin:0 0 6px;font-weight:600;letter-spacing:.06em">C&#xD3;DIGO TEMPORAL &mdash; V&#xC1;LIDO 15 MIN</p><p style="font-size:36px;font-weight:700;color:var(--ws);margin:0;letter-spacing:10px;font-family:var(--fm)">${r.mostrarCodigo}</p></div>`:''}<div style="display:grid;gap:10px"><div><span class="lbl">C&#xF3;digo de verificaci&#xF3;n</span><input class="inp" type="text" placeholder="123456" maxlength="6" value="${r.code}" oninput="S.rpw.code=this.value" style="font-size:22px;letter-spacing:6px;text-align:center;font-family:var(--fm)"></div><div><span class="lbl">Nueva contrase&#xF1;a</span><input class="inp" type="password" placeholder="M&#xED;nimo 6 caracteres" value="${r.pass}" oninput="S.rpw.pass=this.value"></div><div><span class="lbl">Confirmar contrase&#xF1;a</span><input class="inp" type="password" placeholder="Repet&#xED; la contrase&#xF1;a" value="${r.conf}" oninput="S.rpw.conf=this.value" onkeydown="if(event.key==='Enter')doResetPw()"></div>${r.err?`<p style="font-size:12px;color:var(--ds);padding:6px 10px;background:var(--db);border-radius:6px">${r.err}</p>`:''}<button class="bok" onclick="doResetPw()" style="font-size:14px;padding:10px"><i class="ti ti-lock-check"></i> Cambiar contrase&#xF1;a</button>${volverBtn}</div></div></div></div>`;
+}
+async function doForgotPw(){
+  S.rpw.err='';
+  if(!S.rpw.email.trim()){S.rpw.err='Ingres&#xE1; tu email';render();return;}
+  try{
+    const r=await fetch(API_BASE+'/auth/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:S.rpw.email.trim()})});
+    const data=await r.json();
+    if(!r.ok){S.rpw.err=data.error||'Error al generar c&#xF3;digo';render();return;}
+    S.rpw.mostrarCodigo=data.codigo||'';
+    S.rpw.step=2;
+    render();
+  }catch(e){S.rpw.err='Error de conexi&#xF3;n';render();}
+}
+async function doResetPw(){
+  S.rpw.err='';
+  if(!S.rpw.code.trim()||!S.rpw.pass||!S.rpw.conf){S.rpw.err='Complet&#xE1; todos los campos';render();return;}
+  if(S.rpw.pass.length<6){S.rpw.err='La contrase&#xF1;a debe tener al menos 6 caracteres';render();return;}
+  if(S.rpw.pass!==S.rpw.conf){S.rpw.err='Las contrase&#xF1;as no coinciden';render();return;}
+  try{
+    const r=await fetch(API_BASE+'/auth/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:S.rpw.email,codigo:S.rpw.code.trim(),password_nueva:S.rpw.pass})});
+    const data=await r.json();
+    if(!r.ok){S.rpw.err=data.error||'C&#xF3;digo inv&#xE1;lido o expirado';render();return;}
+    S.view='login';S.rpw={step:1,email:'',code:'',pass:'',conf:'',err:'',mostrarCodigo:''};
+    S.login.err='';toast('Contrase\xF1a actualizada. Pod\xE9s ingresar ahora.');render();
+  }catch(e){S.rpw.err='Error de conexi&#xF3;n';render();}
+}
 
 function rPanel(){
   const pd=S.panelDias||14,px=aEvs(0,pd),urg=px.filter(x=>x.color==='orange'&&x.dl<=3),aud=px.filter(x=>x.color==='green'),reb=rebs(),cad=cadInst(),a51=art51Pend();
@@ -1994,7 +2029,7 @@ async function duplicarExp(expId){
 function render(){
   document.documentElement.setAttribute('data-theme',S.dark?'dark':'');
   const el=document.getElementById('app');
-  if(!S.logueado){el.innerHTML=rLogin();return}
+  if(!S.logueado){el.innerHTML=S.view==='forgot'?rForgotPw():rLogin();return}
   // Save focused search input before DOM replacement
   const _fa=document.activeElement;
   const _fid=_fa&&_fa.dataset?_fa.dataset.sid:null;
