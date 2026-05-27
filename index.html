@@ -563,7 +563,9 @@ function rLogin(){return`<div style="min-height:85vh;display:flex;align-items:ce
 async function doLogin(){
   if(!S.login.user.trim()||!S.login.pass.trim()){S.login.err='Ingresá usuario y contraseña.';render();return;}
   try{
-    const r=await api('POST','/auth/login',{email:S.login.user,password:S.login.pass});
+    const resp=await fetch(API_BASE+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:S.login.user,password:S.login.pass})});
+    const r=await resp.json();
+    if(!resp.ok)throw new Error(r.error||'Credenciales incorrectas');
     setToken(r.token);S.prof.nombre=r.usuario.nombre;S.prof.email=r.usuario.email;
     S._usuarioRol=r.usuario.rol;S.logueado=true;S.login.err='';S._alertaClosed=false;
     await refreshTodos();go('panel');
