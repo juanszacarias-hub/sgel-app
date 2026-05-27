@@ -1242,7 +1242,7 @@ function rAlertaApertura(){
         <p style="font-size:17px;font-weight:700;color:#fff;margin:0">${hdrTxt}</p>
       </div>
       <button onclick="S._alertaClosed=true;render()" style="background:rgba(255,255,255,.2);border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <i class="ti ti-x" style="color:#fff;font-size:16px"></i>
+        <i class="ti ti-x" style="color:#fff;font-size:16px"></i><span class="ti-fb" style="color:#fff;font-size:18px;line-height:1;font-style:normal">✕</span>
       </button>
     </div>
 
@@ -1251,7 +1251,7 @@ function rAlertaApertura(){
 
       ${d.cad.length?`
       <div style="margin:10px 0 0">
-        <p style="font-size:10px;font-weight:600;color:var(--ds);text-transform:uppercase;letter-spacing:.07em;margin:0 0 6px">🔴 <i class="ti ti-clock-off" style="font-size:11px;vertical-align:-1px"></i> Riesgo caducidad de instancia</p>
+        <p style="font-size:10px;font-weight:600;color:var(--ds);text-transform:uppercase;letter-spacing:.07em;margin:0 0 6px"><span style="font-style:normal">&#x1F534;</span> <i class="ti ti-clock-off" style="font-size:11px;vertical-align:-1px"></i> Riesgo caducidad de instancia</p>
         ${d.cad.map(exp=>`<div style="background:var(--db);border:.5px solid var(--db2);border-radius:8px;padding:8px 11px;margin-bottom:6px">
           <p style="font-size:12px;font-weight:600;color:var(--ds);margin:0">Más de 1 año sin impulso procesal</p>
           <p style="font-size:11px;color:var(--ts);margin:2px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${exp.car}</p>
@@ -1261,7 +1261,7 @@ function rAlertaApertura(){
 
       ${d.reb.length?`
       <div style="margin:10px 0 0">
-        <p style="font-size:10px;font-weight:600;color:var(--ds);text-transform:uppercase;letter-spacing:.07em;margin:0 0 6px">🔴 <i class="ti ti-alert-triangle" style="font-size:11px;vertical-align:-1px"></i> Acusar rebeldía</p>
+        <p style="font-size:10px;font-weight:600;color:var(--ds);text-transform:uppercase;letter-spacing:.07em;margin:0 0 6px"><span style="font-style:normal">&#x1F534;</span> <i class="ti ti-alert-triangle" style="font-size:11px;vertical-align:-1px"></i> Acusar rebeldía</p>
         ${d.reb.map(x=>`<div style="background:var(--db);border:.5px solid var(--db2);border-radius:8px;padding:8px 11px;margin-bottom:6px">
           <p style="font-size:12px;font-weight:600;color:var(--ds);margin:0">${TR[x.ev.tr]?.l} — contraparte no respondió</p>
           <p style="font-size:11px;color:var(--ts);margin:2px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.exp.car}</p>
@@ -1271,7 +1271,7 @@ function rAlertaApertura(){
 
       ${d.a51.length?`
       <div style="margin:10px 0 0">
-        <p style="font-size:10px;font-weight:600;color:var(--ps);text-transform:uppercase;letter-spacing:.07em;margin:0 0 6px">🟣 <i class="ti ti-calendar-plus" style="font-size:11px;vertical-align:-1px"></i> Fijar Audiencia Art. 51</p>
+        <p style="font-size:10px;font-weight:600;color:var(--ps);text-transform:uppercase;letter-spacing:.07em;margin:0 0 6px"><span style="font-style:normal">&#x1F7E3;</span> <i class="ti ti-calendar-plus" style="font-size:11px;vertical-align:-1px"></i> Fijar Audiencia Art. 51</p>
         ${d.a51.map(exp=>`<div style="background:var(--pb);border:.5px solid var(--pb2);border-radius:8px;padding:8px 11px;margin-bottom:6px">
           <p style="font-size:12px;font-weight:600;color:var(--ps);margin:0">Plazo de 30 días próximo a vencer</p>
           <p style="font-size:11px;color:var(--ts);margin:2px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${exp.car}</p>
@@ -1280,13 +1280,13 @@ function rAlertaApertura(){
 
       ${d.urgentes.length?`
       <div style="margin:10px 0 0">
-        <p style="font-size:10px;font-weight:600;color:var(--ds);text-transform:uppercase;letter-spacing:.07em;margin:0 0 0">🔥 <i class="ti ti-flame" style="font-size:11px;vertical-align:-1px"></i> Vencen hoy o mañana</p>
+        <p style="font-size:10px;font-weight:600;color:var(--ds);text-transform:uppercase;letter-spacing:.07em;margin:0 0 0"><span style="font-style:normal">&#x1F525;</span> <i class="ti ti-flame" style="font-size:11px;vertical-align:-1px"></i> Vencen hoy o mañana</p>
         ${d.urgentes.map(rowEv).join('')}
       </div>`:'' }
 
       ${d.proximos.length?`
       <div style="margin:10px 0 0">
-        <p style="font-size:10px;font-weight:600;color:var(--ws);text-transform:uppercase;letter-spacing:.07em;margin:0 0 0">🟠 <i class="ti ti-clock" style="font-size:11px;vertical-align:-1px"></i> Próximos 7 días</p>
+        <p style="font-size:10px;font-weight:600;color:var(--ws);text-transform:uppercase;letter-spacing:.07em;margin:0 0 0"><span style="font-style:normal">&#x1F7E0;</span> <i class="ti ti-clock" style="font-size:11px;vertical-align:-1px"></i> Próximos 7 días</p>
         ${d.proximos.map(rowEv).join('')}
       </div>`:'' }
 
