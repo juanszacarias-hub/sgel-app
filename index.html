@@ -526,7 +526,7 @@ function lg(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function ls(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 
 
-let S={view:'login',logueado:false,db:[],prof:{nombre:'',email:'',whatsapp:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}},login:{user:'',pass:'',err:''},chgPw:{a:'',n:'',c:'',err:'',ok:false},calM:HOY.getMonth(),calY:HOY.getFullYear(),expId:null,formExp:false,busq:'',ne:{cuij:'',car:'',rol:'Actor',sede:'Distrito 1',etapa:'',monto:'',montoAcordado:'',notas:'',ciudad:'',trNom:'',trJuez:'',trSec:'',trEmail:'',trTel:'',cliente:'',clienteTel:'',folio:''},ev:{step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:''},rptM:HOY.getMonth(),rptY:HOY.getFullYear(),rptExpId:null,calc:{fecha:ds(HOY),tipo:'',custom:5,desde:'nota',cf:'',tab:'plazos',ibm:'',incap:'',edad:45,factor:'1.44',adj:'20'},hist:{expId:null,fil:'todo',busq:''},cr:{paso:1,tipo:'',ref:'',fecha:'',suj:'',expId:'',_cf:''},ref:{busq:'',sec:''},toast:'',tour:false,_tourPaso:0,_alertaClosed:false,panelDias:14,_modalEscrito:null,_modalCedula:null,_modalConcil:null,_navHist:[],_gq:'',dark:false};
+let S={view:'login',logueado:false,db:[],prof:{nombre:'',email:'',whatsapp:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}},login:{user:'',pass:'',err:''},chgPw:{a:'',n:'',c:'',err:'',ok:false},calM:HOY.getMonth(),calY:HOY.getFullYear(),expId:null,formExp:false,busq:'',ne:{cuij:'',car:'',rol:'Actor',sede:'Distrito 1',etapa:'',monto:'',montoAcordado:'',notas:'',ciudad:'',trNom:'',trJuez:'',trSec:'',trEmail:'',trTel:'',cliente:'',clienteTel:'',folio:''},ev:{step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:''},rptM:HOY.getMonth(),rptY:HOY.getFullYear(),rptExpId:null,calc:{fecha:ds(HOY),tipo:'',custom:5,desde:'nota',cf:'',tab:'plazos',ibm:'',incap:'',edad:45,factor:'1.44',adj:'20'},hist:{expId:null,fil:'todo',busq:''},cr:{paso:1,tipo:'',ref:'',fecha:'',suj:'',expId:'',_cf:''},ref:{busq:'',sec:''},toast:'',tour:false,_tourPaso:0,_alertaClosed:false,panelDias:14,_modalEscrito:null,_modalCedula:null,_modalConcil:null,_navHist:[],_gq:'',dark:false,_modalNuevaAlerta:false,_fna:{titulo:'',desc:'',fecha:'',expId:''}};
 
 function loadState(){}
 function saveDB(){}
@@ -536,6 +536,10 @@ function saveProf(){
   _feriaExtra=S.prof.feriaExtra||[];
   localStorage.setItem('sgel_dark',S.dark?'1':'0');
 }
+function loadAlertasManuales(){try{return JSON.parse(localStorage.getItem('sgel_alertas_manuales')||'[]');}catch(e){return[];}}
+function saveAlertasManuales(arr){localStorage.setItem('sgel_alertas_manuales',JSON.stringify(arr));}
+function crearAlertaManual(){const f=S._fna||{};if(!(f.titulo||'').trim()){toast('El título es obligatorio');return;}if(!f.fecha){toast('La fecha de vencimiento es obligatoria');return;}const arr=loadAlertasManuales();arr.push({id:Date.now(),titulo:f.titulo.trim(),desc:(f.desc||'').trim(),fecha:f.fecha,expId:f.expId||'',ts:Date.now()});saveAlertasManuales(arr);S._modalNuevaAlerta=false;render();toast('Alerta creada');}
+function eliminarAlertaManual(id){const arr=loadAlertasManuales().filter(a=>a.id!==id);saveAlertasManuales(arr);render();}
 function toast(m){S.toast=m;render();setTimeout(()=>{S.toast='';render()},2500)}
 function addLog(expId,tipo,msg){}
 
@@ -830,15 +834,40 @@ function rCal(){
 }
 
 function rAlrt(){
-  const a48=aEvs(0,2).filter(x=>x.color==='green'),a24=aEvs(0,1).filter(x=>x.color==='orange'),reb=rebs(),vig=aEvs(1,7).filter(x=>x.color==='blue'),cad=cadInst(),a51=art51Pend();
-  return`${rHdr()}<span class="sec">Alertas activas</span>
-${!a48.length&&!a24.length&&!reb.length&&!vig.length&&!cad.length&&!a51.length?`<div class="rbox" style="text-align:center;padding:2.5rem"><i class="ti ti-circle-check" style="font-size:32px;color:var(--gs)"></i><p style="color:var(--ts);margin-top:10px;font-weight:500">Sin alertas activas</p></div>`:''}
+  const a48=aEvs(0,2).filter(x=>x.color==='green'),a24=aEvs(0,1).filter(x=>x.color==='orange'),reb=rebs(),vig=aEvs(1,7).filter(x=>x.color==='blue'),cad=cadInst(),a51=art51Pend(),manuales=loadAlertasManuales();
+  return`${rHdr()}<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span class="sec" style="margin:0">Alertas activas</span><button class="btn" onclick="S._modalNuevaAlerta=true;S._fna={titulo:'',desc:'',fecha:'',expId:''};render()"><i class="ti ti-plus"></i><span class="ti-fb">+</span> Nueva alerta</button></div>
+${!a48.length&&!a24.length&&!reb.length&&!vig.length&&!cad.length&&!a51.length&&!manuales.length?`<div class="rbox" style="text-align:center;padding:2.5rem"><i class="ti ti-circle-check" style="font-size:32px;color:var(--gs)"></i><p style="color:var(--ts);margin-top:10px;font-weight:500">Sin alertas activas</p></div>`:''}
 ${cad.map(exp=>`<div class="ad ad-d"><i class="ti ti-clock-off" style="color:var(--ds);flex-shrink:0;font-size:16px;margin-top:1px"></i><div style="flex:1;min-width:0"><p style="font-size:12px;font-weight:600;color:var(--ds);margin:0 0 2px">Riesgo caducidad de instancia</p><p style="font-size:13px;font-weight:500;margin:0">${exp.car}</p><p style="font-size:10px;color:var(--ds);margin:2px 0 0">Más de 1 año sin impulso. Íntimar por 10 días (CPL art. 95)</p></div></div>`).join('')}
 ${a51.map(exp=>`<div class="ad ad-p"><i class="ti ti-calendar-plus" style="color:var(--ps);flex-shrink:0;font-size:16px;margin-top:1px"></i><div style="flex:1;min-width:0"><p style="font-size:12px;font-weight:600;color:var(--ps);margin:0 0 2px">Fijar Audiencia Art. 51</p><p style="font-size:13px;font-weight:500;margin:0">${exp.car}</p><p style="font-size:10px;color:var(--ps);margin:2px 0 0">Máx. 30 días desde contestación (CPL Art. 51)</p></div></div>`).join('')}
 ${reb.map(x=>`<div class="ad ad-d"><i class="ti ti-alert-triangle" style="color:var(--ds);flex-shrink:0;font-size:16px;margin-top:1px"></i><div style="flex:1;min-width:0"><p style="font-size:12px;font-weight:600;color:var(--ds);margin:0 0 2px">Radar — acusar rebeldía</p><p style="font-size:13px;font-weight:500;margin:0">${TR[x.ev.tr]?.l}</p><p style="font-size:11px;color:var(--ts);margin:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.exp.car}</p><p style="font-size:10px;color:var(--ds);margin:0">Venció ${fC(x.date)} · ${dlb(x.dl)}</p></div></div>`).join('')}
 ${a48.map(x=>`<div class="ad ad-s"><i class="ti ti-bell" style="color:var(--gs);flex-shrink:0;font-size:16px;margin-top:1px"></i><div style="flex:1;min-width:0"><p style="font-size:12px;font-weight:600;color:var(--gs);margin:0 0 2px">Audiencia en 48hs</p><p style="font-size:13px;font-weight:500;margin:0">${x.ev.desc}</p><p style="font-size:11px;color:var(--ts);margin:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.exp.car}</p><p style="font-size:10px;color:var(--gs);margin:0">${fmt(x.date)} · ${dlb(x.dl)}</p></div></div>`).join('')}
 ${a24.map(x=>`<div class="ad ad-w"><i class="ti ti-bell" style="color:var(--ws);flex-shrink:0;font-size:16px;margin-top:1px"></i><div style="flex:1;min-width:0"><p style="font-size:12px;font-weight:600;color:var(--ws);margin:0 0 2px">Vencimiento en 24hs</p><p style="font-size:13px;font-weight:500;margin:0">${TR[x.ev.tr]?.l}</p><p style="font-size:11px;color:var(--ts);margin:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.exp.car}</p><p style="font-size:10px;color:var(--ws);margin:0">Vence ${fmt(x.date)} · Gracia: ${fmt(x.ev.c.gr)} 09:00</p></div></div>`).join('')}
-${vig.map(x=>`<div class="ad ad-i"><i class="ti ti-eye" style="color:var(--is);flex-shrink:0;font-size:16px;margin-top:1px"></i><div style="flex:1;min-width:0"><p style="font-size:12px;font-weight:600;color:var(--is);margin:0 0 2px">Vigilancia contraparte</p><p style="font-size:13px;font-weight:500;margin:0">${TR[x.ev.tr]?.l}</p><p style="font-size:11px;color:var(--ts);margin:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.exp.car}</p><p style="font-size:10px;color:var(--is);margin:0">Vence ${fmt(x.date)} · ${dlb(x.dl)}</p></div></div>`).join('')}`;
+${vig.map(x=>`<div class="ad ad-i"><i class="ti ti-eye" style="color:var(--is);flex-shrink:0;font-size:16px;margin-top:1px"></i><div style="flex:1;min-width:0"><p style="font-size:12px;font-weight:600;color:var(--is);margin:0 0 2px">Vigilancia contraparte</p><p style="font-size:13px;font-weight:500;margin:0">${TR[x.ev.tr]?.l}</p><p style="font-size:11px;color:var(--ts);margin:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.exp.car}</p><p style="font-size:10px;color:var(--is);margin:0">Vence ${fmt(x.date)} · ${dlb(x.dl)}</p></div></div>`).join('')}
+${manuales.length?`<span class="sec" style="margin-top:4px">Alertas personalizadas</span>`:''}
+${manuales.map(al=>{const xp=al.expId?S.db.find(e=>e.id==al.expId):null;const venc=al.fecha?new Date(al.fecha+'T12:00:00'):null;const dl=venc?dL(venc):null;const vencida=dl!==null&&dl<0;const dlTxt=dl===null?'':dl<0?`venció hace ${Math.abs(dl)}d`:dl===0?'HOY':dl===1?'MAÑANA':`en ${dl}d`;return`<div class="ad ${vencida?'ad-d':'ad-p'}" style="align-items:flex-start"><i class="ti ti-bell-ringing" style="color:${vencida?'var(--ds)':'var(--ps)'};flex-shrink:0;font-size:16px;margin-top:1px"></i><div class="ti-fb" style="font-size:16px;flex-shrink:0;margin-top:1px">🔔</div><div style="flex:1;min-width:0"><p style="font-size:12px;font-weight:600;color:${vencida?'var(--ds)':'var(--ps)'};margin:0 0 2px">${al.titulo}</p>${al.desc?`<p style="font-size:11px;color:var(--ts);margin:0 0 2px">${al.desc}</p>`:''}${xp?`<p style="font-size:11px;color:var(--ts);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${xp.car}</p>`:''}${venc?`<p style="font-size:10px;color:${vencida?'var(--ds)':'var(--ps)'};margin:2px 0 0">${fC(venc)}${dlTxt?` · ${dlTxt}`:''}</p>`:''}</div><button onclick="eliminarAlertaManual(${al.id})" style="background:none;border:none;cursor:pointer;color:var(--tt);padding:2px 4px;flex-shrink:0;display:flex;align-items:center" title="Eliminar alerta"><i class="ti ti-trash" style="font-size:15px"></i><span class="ti-fb">🗑</span></button></div>`}).join('')}`;
+}
+
+function rModalNuevaAlerta(){
+  const f=S._fna||{titulo:'',desc:'',fecha:'',expId:''};
+  const exps=S.db.filter(e=>e.estado==='activo');
+  return`<div style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:3000;display:flex;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this){S._modalNuevaAlerta=false;render()}">
+  <div style="background:var(--bp);border-radius:14px;max-width:440px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,.3)" onclick="event.stopPropagation()">
+    <div style="padding:1.125rem 1.25rem;border-bottom:.5px solid var(--bt);display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:8px"><i class="ti ti-bell-plus" style="font-size:18px;color:var(--ps)"></i><p style="font-size:16px;font-weight:600;margin:0">Nueva alerta personalizada</p></div>
+      <button onclick="S._modalNuevaAlerta=false;render()" style="background:none;border:none;cursor:pointer;color:var(--tt);display:flex;align-items:center;justify-content:center;width:28px;height:28px"><i class="ti ti-x" style="font-size:17px"></i></button>
+    </div>
+    <div style="padding:1.125rem 1.25rem;display:grid;gap:12px">
+      <div><span class="lbl">Título *</span><input class="inp" type="text" placeholder="Ej: Presentar pericial médica" value="${f.titulo}" data-sid="fna-titulo" oninput="S._fna.titulo=this.value"></div>
+      <div><span class="lbl">Descripción (opcional)</span><textarea class="ta" placeholder="Detalles adicionales..." oninput="S._fna.desc=this.value">${f.desc}</textarea></div>
+      <div><span class="lbl">Fecha de vencimiento *</span><input class="inp" type="date" value="${f.fecha}" onchange="S._fna.fecha=this.value"></div>
+      <div><span class="lbl">Expediente (opcional)</span><select class="sel" onchange="S._fna.expId=this.value"><option value="">— Sin expediente —</option>${exps.map(e=>`<option value="${e.id}"${f.expId==e.id?'selected':''}>${e.car}</option>`).join('')}</select></div>
+    </div>
+    <div style="padding:.875rem 1.25rem;border-top:.5px solid var(--bt);display:flex;gap:8px">
+      <button onclick="S._modalNuevaAlerta=false;render()" class="btn" style="flex:1;justify-content:center"><i class="ti ti-x"></i> Cancelar</button>
+      <button onclick="crearAlertaManual()" style="flex:1;background:var(--pb);border:.5px solid var(--pb2);border-radius:7px;padding:9px 14px;cursor:pointer;font-size:13px;color:var(--ps);display:flex;align-items:center;justify-content:center;gap:6px;font-weight:500"><i class="ti ti-plus"></i> Crear alerta</button>
+    </div>
+  </div>
+  </div>`;
 }
 
 function cJD(m,a){const l=new Date(a,m+1,0).getDate();let c=0;for(let d=1;d<=l;d++)if(!isOff(new Date(a,m,d)))c++;return c}
@@ -1222,7 +1251,7 @@ function rAlertaApertura(){
 
       ${d.cad.length?`
       <div style="margin:10px 0 0">
-        <p style="font-size:10px;font-weight:600;color:var(--ds);text-transform:uppercase;letter-spacing:.07em;margin:0 0 6px"><i class="ti ti-clock-off" style="font-size:11px;vertical-align:-1px"></i> Riesgo caducidad de instancia</p>
+        <p style="font-size:10px;font-weight:600;color:var(--ds);text-transform:uppercase;letter-spacing:.07em;margin:0 0 6px">🔴 <i class="ti ti-clock-off" style="font-size:11px;vertical-align:-1px"></i> Riesgo caducidad de instancia</p>
         ${d.cad.map(exp=>`<div style="background:var(--db);border:.5px solid var(--db2);border-radius:8px;padding:8px 11px;margin-bottom:6px">
           <p style="font-size:12px;font-weight:600;color:var(--ds);margin:0">Más de 1 año sin impulso procesal</p>
           <p style="font-size:11px;color:var(--ts);margin:2px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${exp.car}</p>
@@ -1232,7 +1261,7 @@ function rAlertaApertura(){
 
       ${d.reb.length?`
       <div style="margin:10px 0 0">
-        <p style="font-size:10px;font-weight:600;color:var(--ds);text-transform:uppercase;letter-spacing:.07em;margin:0 0 6px"><i class="ti ti-alert-triangle" style="font-size:11px;vertical-align:-1px"></i> Acusar rebeldía</p>
+        <p style="font-size:10px;font-weight:600;color:var(--ds);text-transform:uppercase;letter-spacing:.07em;margin:0 0 6px">🔴 <i class="ti ti-alert-triangle" style="font-size:11px;vertical-align:-1px"></i> Acusar rebeldía</p>
         ${d.reb.map(x=>`<div style="background:var(--db);border:.5px solid var(--db2);border-radius:8px;padding:8px 11px;margin-bottom:6px">
           <p style="font-size:12px;font-weight:600;color:var(--ds);margin:0">${TR[x.ev.tr]?.l} — contraparte no respondió</p>
           <p style="font-size:11px;color:var(--ts);margin:2px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.exp.car}</p>
@@ -1242,7 +1271,7 @@ function rAlertaApertura(){
 
       ${d.a51.length?`
       <div style="margin:10px 0 0">
-        <p style="font-size:10px;font-weight:600;color:var(--ps);text-transform:uppercase;letter-spacing:.07em;margin:0 0 6px"><i class="ti ti-calendar-plus" style="font-size:11px;vertical-align:-1px"></i> Fijar Audiencia Art. 51</p>
+        <p style="font-size:10px;font-weight:600;color:var(--ps);text-transform:uppercase;letter-spacing:.07em;margin:0 0 6px">🟣 <i class="ti ti-calendar-plus" style="font-size:11px;vertical-align:-1px"></i> Fijar Audiencia Art. 51</p>
         ${d.a51.map(exp=>`<div style="background:var(--pb);border:.5px solid var(--pb2);border-radius:8px;padding:8px 11px;margin-bottom:6px">
           <p style="font-size:12px;font-weight:600;color:var(--ps);margin:0">Plazo de 30 días próximo a vencer</p>
           <p style="font-size:11px;color:var(--ts);margin:2px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${exp.car}</p>
@@ -1251,13 +1280,13 @@ function rAlertaApertura(){
 
       ${d.urgentes.length?`
       <div style="margin:10px 0 0">
-        <p style="font-size:10px;font-weight:600;color:var(--ds);text-transform:uppercase;letter-spacing:.07em;margin:0 0 0"><i class="ti ti-flame" style="font-size:11px;vertical-align:-1px"></i> Vencen hoy o mañana</p>
+        <p style="font-size:10px;font-weight:600;color:var(--ds);text-transform:uppercase;letter-spacing:.07em;margin:0 0 0">🔥 <i class="ti ti-flame" style="font-size:11px;vertical-align:-1px"></i> Vencen hoy o mañana</p>
         ${d.urgentes.map(rowEv).join('')}
       </div>`:'' }
 
       ${d.proximos.length?`
       <div style="margin:10px 0 0">
-        <p style="font-size:10px;font-weight:600;color:var(--ws);text-transform:uppercase;letter-spacing:.07em;margin:0 0 0"><i class="ti ti-clock" style="font-size:11px;vertical-align:-1px"></i> Próximos 7 días</p>
+        <p style="font-size:10px;font-weight:600;color:var(--ws);text-transform:uppercase;letter-spacing:.07em;margin:0 0 0">🟠 <i class="ti ti-clock" style="font-size:11px;vertical-align:-1px"></i> Próximos 7 días</p>
         ${d.proximos.map(rowEv).join('')}
       </div>`:'' }
 
@@ -1267,7 +1296,7 @@ function rAlertaApertura(){
     <!-- Footer -->
     <div style="padding:.875rem 1.25rem;border-top:.5px solid var(--bt);display:flex;gap:8px">
       <button onclick="S._alertaClosed=true;go('alertas')" style="flex:1;background:${hdrBg};border:none;border-radius:8px;padding:10px;cursor:pointer;font-size:13px;font-weight:600;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-bell"></i> Ver todas las alertas</button>
-      <button onclick="S._alertaClosed=true;render()" class="btn" style="flex:1;justify-content:center;font-size:13px">Continuar al panel</button>
+      <button onclick="S._alertaClosed=true;render()" class="btn" style="flex:1;justify-content:center;font-size:13px"><i class="ti ti-arrow-right"></i><span class="ti-fb">→</span> Continuar al panel</button>
     </div>
 
   </div>
@@ -1976,7 +2005,7 @@ function render(){
   else if(v==='expedientes'){const alertaHtml=(!S._alertaClosed&&!S.tour)?rAlertaApertura():'';el.innerHTML=rExp()+alertaHtml+(S.tour?rTour():'')+(S._modalEscrito?rModalEscrito():'')+(S._modalCedula?rModalCedula():'')+(S._modalConcil?rModalConcil():'');}
   else if(v==='historial')el.innerHTML=rHist();
   else if(v==='calendario')el.innerHTML=rCal();
-  else if(v==='alertas')el.innerHTML=rAlrt();
+  else if(v==='alertas')el.innerHTML=rAlrt()+(S._modalNuevaAlerta?rModalNuevaAlerta():'');
   else if(v==='reporte')el.innerHTML=rRpt();
   else if(v==='calculadora')el.innerHTML=rCalc();
   else if(v==='referencia')el.innerHTML=rRef();
