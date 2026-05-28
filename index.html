@@ -215,7 +215,7 @@ async function initApp(){
     const me=await api('GET','/auth/me');
     S.prof.nombre=me.usuario.nombre;S.prof.email=me.usuario.email;
     S._usuarioRol=me.usuario.rol;S._usuarioId=me.usuario.id;S.logueado=true;S._alertaClosed=false;
-    await loadPreferencias();await refreshTodos();initPush();go('panel');
+    await loadPreferencias();await refreshTodos();initPush();go('panel');checkFirstTimeTour();
   }catch(e){clearToken();render();}
 }
 // ─────────────────────────────────────────────────────────────────────────────
@@ -589,6 +589,8 @@ function saveAlertasManuales(arr){localStorage.setItem(alertasKey(),JSON.stringi
 function crearAlertaManual(){const f=S._fna||{};if(!(f.titulo||'').trim()){toast('El título es obligatorio');return;}if(!f.fecha){toast('La fecha de vencimiento es obligatoria');return;}const arr=loadAlertasManuales();arr.push({id:Date.now(),titulo:f.titulo.trim(),desc:(f.desc||'').trim(),fecha:f.fecha,expId:f.expId||'',ts:Date.now()});saveAlertasManuales(arr);S._modalNuevaAlerta=false;render();toast('Alerta creada');}
 function eliminarAlertaManual(id){const arr=loadAlertasManuales().filter(a=>a.id!==id);saveAlertasManuales(arr);render();}
 function toast(m,err){S.toast=m;S.toastErr=!!err;render();setTimeout(()=>{S.toast='';S.toastErr=false;render()},2500)}
+function closeTour(){if(S._usuarioId)ls('sgel_tour_done_'+S._usuarioId,'1');S.tour=false;S._tourPaso=0;render();}
+function checkFirstTimeTour(){if(S._usuarioId&&!lg('sgel_tour_done_'+S._usuarioId)){S.tour=true;render();}}
 function mapAdjFromAPI(a){return{id:a.id,nombre:a.nombre_original,tipo_mime:a.tipo_mime,tamanio:a.tamanio,url:a.url||'',ts:new Date(a.created_at).getTime()};}
 function iconMime(m){if(!m)return'ti-file';if(m.includes('pdf'))return'ti-file-type-pdf';if(m.includes('word')||m.includes('document'))return'ti-file-word';if(m.includes('excel')||m.includes('spreadsheet'))return'ti-file-spreadsheet';if(m.startsWith('image/'))return'ti-photo';return'ti-file';}
 function fmtBytes(b){if(!b)return'?';if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB';}
@@ -673,7 +675,7 @@ async function doRegister(){
     const me=await api('GET','/auth/me');
     S.prof.nombre=me.usuario.nombre;S.prof.email=me.usuario.email;
     S._usuarioRol=me.usuario.rol;S._usuarioId=me.usuario.id;S.logueado=true;S._alertaClosed=false;
-    await loadPreferencias();await refreshTodos();initPush();go('panel');
+    await loadPreferencias();await refreshTodos();initPush();go('panel');checkFirstTimeTour();
   }catch(e){r.err=e.message||'Error al registrarse. Intentá de nuevo.';render();}
 }
 async function doLogin(){
@@ -684,7 +686,7 @@ async function doLogin(){
     if(!resp.ok)throw new Error(r.error||'Credenciales incorrectas');
     setToken(r.token);S.prof.nombre=r.usuario.nombre;S.prof.email=r.usuario.email;
     S._usuarioRol=r.usuario.rol;S._usuarioId=r.usuario.id;S.logueado=true;S.login.err='';S._alertaClosed=false;
-    await loadPreferencias();await refreshTodos();initPush();go('panel');
+    await loadPreferencias();await refreshTodos();initPush();go('panel');checkFirstTimeTour();
   }catch(e){S.login.err=e.message||'Credenciales incorrectas';render();}
 }
 function doLogout(){clearToken();S.logueado=false;S.db=[];S.view='landing';S.login={user:'',pass:'',err:''};render();}
@@ -1368,7 +1370,7 @@ function rTour(){
   const paso=S._tourPaso||0;
   const p=pasos[paso];
   const isLast=paso===pasos.length-1;
-  return`<div style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this){S.tour=false;S._tourPaso=0;render()}">
+  return`<div style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this){closeTour()}">
   <div style="background:var(--bp);border-radius:14px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden" onclick="event.stopPropagation()">
     <!-- Header -->
     <div style="background:${p.bg};border-bottom:.5px solid ${p.bd};padding:1.25rem 1.25rem .875rem">
@@ -1382,7 +1384,7 @@ function rTour(){
             <p style="font-size:17px;font-weight:700;margin:0;color:var(--tp)">${p.titulo}</p>
           </div>
         </div>
-        <button onclick="S.tour=false;S._tourPaso=0;render()" style="background:none;border:none;cursor:pointer;color:var(--tt);font-size:18px;padding:2px;line-height:1;flex-shrink:0"><i class="ti ti-x"></i><span class="ti-fb">✕</span></button>
+        <button onclick="closeTour()" style="background:none;border:none;cursor:pointer;color:var(--tt);font-size:18px;padding:2px;line-height:1;flex-shrink:0"><i class="ti ti-x"></i><span class="ti-fb">✕</span></button>
       </div>
     </div>
     <!-- Dots -->
@@ -1397,7 +1399,7 @@ function rTour(){
     <div style="display:flex;gap:8px;padding:0 1.25rem 1.25rem">
       ${paso>0?`<button onclick="S._tourPaso=${paso-1};render()" class="btn" style="flex:1;justify-content:center"><i class="ti ti-arrow-left"></i> Anterior</button>`:'<div style="flex:1"></div>'}
       ${isLast
-        ?`<button onclick="S.tour=false;S._tourPaso=0;render()" style="flex:2;background:${p.bg};border:.5px solid ${p.bd};border-radius:7px;padding:9px;cursor:pointer;font-size:13px;font-weight:600;color:${p.color};display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-check"></i> ¡Listo, empezar!</button>`
+        ?`<button onclick="closeTour()" style="flex:2;background:${p.bg};border:.5px solid ${p.bd};border-radius:7px;padding:9px;cursor:pointer;font-size:13px;font-weight:600;color:${p.color};display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-check"></i> ¡Listo, empezar!</button>`
         :`<button onclick="S._tourPaso=${paso+1};render()" style="flex:2;background:${p.bg};border:.5px solid ${p.bd};border-radius:7px;padding:9px;cursor:pointer;font-size:13px;font-weight:600;color:${p.color};display:flex;align-items:center;justify-content:center;gap:6px">Siguiente <i class="ti ti-arrow-right"></i></button>`
       }
     </div>
@@ -2394,7 +2396,9 @@ document.addEventListener('keydown', function(e){
   // Escape — cerrar modales
   if(e.key==='Escape'){
     if(S._modalEscrito||S._modalCedula||S._modalConcil||S.tour){
-      S._modalEscrito=null;S._modalCedula=null;S._modalConcil=null;S.tour=false;
+      S._modalEscrito=null;S._modalCedula=null;S._modalConcil=null;
+      if(S.tour&&S._usuarioId)ls('sgel_tour_done_'+S._usuarioId,'1');
+      S.tour=false;S._tourPaso=0;
       render();return;
     }
     if(S.formExp){S.formExp=false;render();return;}
