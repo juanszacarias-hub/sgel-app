@@ -246,12 +246,12 @@ async function initApp(){
     const me=await api('GET','/auth/me');
     S.prof.nombre=me.usuario.nombre;S.prof.email=me.usuario.email;
     S._usuarioRol=me.usuario.rol;S._usuarioId=me.usuario.id;S.logueado=true;S._alertaClosed=false;
-    await loadPreferencias();await refreshTodos();initPush();go('panel');checkFirstTimeTour();
+    await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos()]);initPush();go('panel');checkFirstTimeTour();
   }catch(e){clearToken();render();}
 }
 // ─────────────────────────────────────────────────────────────────────────────
-const HOL=new Set(["2026-01-01","2026-02-16","2026-02-17","2026-03-16","2026-03-17","2026-03-24","2026-04-02","2026-04-03","2026-04-30","2026-05-01","2026-05-25","2026-06-15","2026-06-20","2026-07-09","2026-07-17","2026-08-17","2026-10-09","2026-10-12","2026-11-20","2026-11-23","2026-12-08","2026-12-25","2026-12-31"]);
-const HOL_N={"2026-01-01":"Año Nuevo","2026-02-16":"Carnaval","2026-02-17":"Carnaval","2026-03-16":"Feriado puente","2026-03-17":"Feriado puente","2026-03-24":"Día de la Memoria","2026-04-02":"Viernes Santo","2026-04-03":"Veteranos","2026-04-30":"Feriado puente","2026-05-01":"Día del Trabajador","2026-05-25":"Revolución de Mayo","2026-06-15":"Güemes","2026-06-20":"Día de la Bandera","2026-07-09":"Independencia","2026-07-17":"Feriado puente","2026-08-17":"San Martín","2026-10-09":"Feriado puente","2026-10-12":"Diversidad Cultural","2026-11-20":"Soberanía Nacional","2026-11-23":"Feriado puente","2026-12-08":"Inmaculada Concepción","2026-12-25":"Navidad","2026-12-31":"Fin de año"};
+let HOL=new Set(["2026-01-01","2026-02-16","2026-02-17","2026-03-16","2026-03-17","2026-03-24","2026-04-02","2026-04-03","2026-04-30","2026-05-01","2026-05-25","2026-06-15","2026-06-20","2026-07-09","2026-07-17","2026-08-17","2026-10-09","2026-10-12","2026-11-20","2026-11-23","2026-12-08","2026-12-25","2026-12-31"]);
+let HOL_N={"2026-01-01":"Año Nuevo","2026-02-16":"Carnaval","2026-02-17":"Carnaval","2026-03-16":"Feriado puente","2026-03-17":"Feriado puente","2026-03-24":"Día de la Memoria","2026-04-02":"Viernes Santo","2026-04-03":"Veteranos","2026-04-30":"Feriado puente","2026-05-01":"Día del Trabajador","2026-05-25":"Revolución de Mayo","2026-06-15":"Güemes","2026-06-20":"Día de la Bandera","2026-07-09":"Independencia","2026-07-17":"Feriado puente","2026-08-17":"San Martín","2026-10-09":"Feriado puente","2026-10-12":"Diversidad Cultural","2026-11-20":"Soberanía Nacional","2026-11-23":"Feriado puente","2026-12-08":"Inmaculada Concepción","2026-12-25":"Navidad","2026-12-31":"Fin de año"};
 const MES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const HOY=new Date();
 // Feria judicial Santa Fe — se repite todos los años:
@@ -681,7 +681,7 @@ async function doRegister(){
     const me=await api('GET','/auth/me');
     S.prof.nombre=me.usuario.nombre;S.prof.email=me.usuario.email;
     S._usuarioRol=me.usuario.rol;S._usuarioId=me.usuario.id;S.logueado=true;S._alertaClosed=false;
-    await loadPreferencias();await refreshTodos();initPush();go('panel');checkFirstTimeTour();
+    await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos()]);initPush();go('panel');checkFirstTimeTour();
   }catch(e){r.err=e.message||'Error al registrarse. Intentá de nuevo.';render();}
 }
 async function doLogin(){
@@ -692,10 +692,42 @@ async function doLogin(){
     if(!resp.ok)throw new Error(r.error||'Credenciales incorrectas');
     setToken(r.token);S.prof.nombre=r.usuario.nombre;S.prof.email=r.usuario.email;
     S._usuarioRol=r.usuario.rol;S._usuarioId=r.usuario.id;S.logueado=true;S.login.err='';S._alertaClosed=false;
-    await loadPreferencias();await refreshTodos();initPush();go('panel');checkFirstTimeTour();
+    await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos()]);initPush();go('panel');checkFirstTimeTour();
   }catch(e){S.login.err=e.message||'Credenciales incorrectas';render();}
 }
 function doLogout(){clearToken();S.logueado=false;S.db=[];S.view='landing';S.login={user:'',pass:'',err:''};render();}
+
+async function loadConfig(){
+  try{
+    const r=await fetch(API_BASE+'/config');
+    if(!r.ok)return;
+    const d=await r.json();
+    S._ibmGlobal=d.ibm_vigente||0;
+    S._ibmGlobalFecha=d.ibm_fecha||'';
+    // Prellenar IBM del perfil solo si el usuario no tiene uno guardado
+    if(!S.prof.ibm&&S._ibmGlobal>0){
+      S.prof.ibm=S._ibmGlobal;
+      S.prof.ibmFecha=S._ibmGlobalFecha;
+    }
+  }catch(e){console.warn('[loadConfig]',e.message);}
+}
+
+async function loadFeriados(){
+  try{
+    const anio=new Date().getFullYear(),anioSig=anio+1;
+    const [r1,r2]=await Promise.all([
+      fetch(API_BASE+'/feriados?año='+anio),
+      fetch(API_BASE+'/feriados?año='+anioSig),
+    ]);
+    if(!r1.ok||!r2.ok)return;
+    const [d1,d2]=await Promise.all([r1.json(),r2.json()]);
+    const todos=[...(d1.feriados||[]),...(d2.feriados||[])];
+    if(!todos.length)return;
+    HOL=new Set(todos.map(f=>f.fecha.substring(0,10)));
+    HOL_N=Object.fromEntries(todos.map(f=>[f.fecha.substring(0,10),f.descripcion]));
+    console.log(`[loadFeriados] ${todos.length} feriados cargados desde la API`);
+  }catch(e){console.warn('[loadFeriados] usando lista local:',e.message);}
+}
 
 function rForgotPw(){
   const r=S.rpw;
