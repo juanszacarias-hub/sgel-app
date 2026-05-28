@@ -24,18 +24,25 @@ body{font-family:var(--fs);font-size:14px;color:var(--tp);background:#f1f5f9;min
   .g2{grid-template-columns:1fr!important}
   .g4{grid-template-columns:1fr 1fr!important}
   .card{padding:.75rem!important}
+  .card p,.card span{word-break:break-word}
   .inp,.sel,.ta{font-size:16px!important} /* prevents zoom on iOS */
   .btn{padding:7px 11px!important}
-  .bok{padding:11px!important}
+  .bok{padding:12px!important;font-size:15px!important}
   nav{padding:6px 10px 10px!important}
-  .nav-item{padding:5px 8px!important;font-size:10px!important}
-  .nav-item i{font-size:16px!important}
   h2{font-size:16px!important}
   .sec{font-size:10px!important}
   .mc{padding:.625rem!important}
+  /* Nav: scroll horizontal con solo íconos */
+  .nav-scroll{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:3px;scrollbar-width:none;-ms-overflow-style:none}
+  .nav-scroll::-webkit-scrollbar{display:none}
+  .nt{padding:8px 10px!important;min-width:40px;justify-content:center!important;flex-shrink:0}
+  .nt span{display:none}
+  /* Modales: bottom-sheet */
+  .mob-modal-wrap{align-items:flex-end!important;padding:0!important}
+  .mob-modal-box{border-radius:16px 16px 0 0!important;max-width:100%!important;width:100%!important;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 }
 @media(max-width:360px){
-  .nav-item span{display:none} /* hide labels on very small screens, keep icons */
+  .nt{padding:6px 8px!important;min-width:36px}
 }
 #shell{max-width:900px;margin:0 auto;background:var(--bp);min-height:100vh;padding:1rem 1.25rem 4rem}
 .nt{cursor:pointer;padding:5px 10px;border-radius:6px;font-size:12px;border:.5px solid transparent;color:var(--ts);background:none;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
@@ -588,7 +595,7 @@ function rHdr(){
   const nav=[{v:'panel',i:'ti-layout-dashboard',l:'Panel'},{v:'carga',i:'ti-bolt',l:'Carga'},{v:'expedientes',i:'ti-files',l:'Expedientes'},{v:'historial',i:'ti-history',l:'Historial'},{v:'calendario',i:'ti-calendar',l:'Cal.'},{v:'agenda',i:'ti-calendar-week',l:'Agenda'},{v:'alertas',i:'ti-bell',l:alerts?`Alertas(${alerts})`:'Alertas',d:alerts>0},{v:'reporte',i:'ti-chart-bar',l:'Reporte'},{v:'calculadora',i:'ti-calculator',l:'Calc.'},{v:'stats',i:'ti-chart-pie',l:'Stats'},{v:'referencia',i:'ti-book',l:'CPL'},{v:'busqueda',i:'ti-search',l:'Buscar'},{v:'guia',i:'ti-map-pin',l:'Guía'},...(S._usuarioRol==='admin'?[{v:'admin',i:'ti-users-group',l:'Usuarios'}]:[])];
   return`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.875rem;flex-wrap:wrap;gap:7px;padding-bottom:.875rem;border-bottom:.5px solid var(--bt)"><div><p style="font-size:9px;font-family:var(--fm);color:var(--tt);margin:0;letter-spacing:.1em">SGEL · CPL SANTA FE · v3</p><h1 style="font-size:18px;font-weight:600;margin:0">Guardián Procesal</h1></div><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:5px">
         ${S._navHist.length?`<button onclick="goBack()" title="Volver atrás" style="width:34px;height:34px;border-radius:9px;border:1.5px solid var(--is);background:var(--ib);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--is);flex-shrink:0;box-shadow:0 2px 6px rgba(29,78,216,.15)"><i class="ti ti-arrow-left" style="font-size:18px;font-weight:700"></i><span class="ti-fb" style="font-size:18px;font-weight:700">←</span></button>`:''}
-        <div style="display:flex;gap:2px;flex-wrap:wrap">${nav.map(n=>`<button class="nt${S.view===n.v?' on':''}" onclick="go('${n.v}')" style="${n.d?'color:var(--ds)':''}"><i class="ti ${n.i}"></i>${n.l?' '+n.l:''}</button>`).join('')}</div><div style="width:30px;height:30px;border-radius:50%;background:var(--ib);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--is);cursor:pointer;border:.5px solid var(--ib2)" onclick="go('config')">${ini}</div></div><button onclick="S.tour=true;S._tourPaso=0;render()" title="Guía de uso" style="width:30px;height:30px;border-radius:50%;background:var(--bs);border:.5px solid var(--bt);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ts);font-weight:700">?</button>
+        <div class="nav-scroll" style="display:flex;gap:2px;flex-wrap:wrap">${nav.map(n=>`<button class="nt${S.view===n.v?' on':''}" onclick="go('${n.v}')" style="${n.d?'color:var(--ds)':''}"><i class="ti ${n.i}"></i>${n.l?'<span> '+n.l+'</span>':''}</button>`).join('')}</div><div style="width:30px;height:30px;border-radius:50%;background:var(--ib);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--is);cursor:pointer;border:.5px solid var(--ib2)" onclick="go('config')">${ini}</div></div><button onclick="S.tour=true;S._tourPaso=0;render()" title="Guía de uso" style="width:30px;height:30px;border-radius:50%;background:var(--bs);border:.5px solid var(--bt);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ts);font-weight:700">?</button>
     <button onclick="S.dark=!S.dark;saveProf();render()" title="${S.dark?'Modo claro':'Modo oscuro'}" style="width:30px;height:30px;border-radius:50%;background:var(--bs);border:.5px solid var(--bt);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--ts)"><i class="ti ${S.dark?'ti-sun':'ti-moon'}"></i><span class="ti-fb">${S.dark?'☀':'🌙'}</span></button></div></div></div>${S.toast?`<div style="background:var(--gb);color:var(--gs);padding:7px 14px;border-radius:7px;font-size:12px;margin-bottom:10px;border:.5px solid var(--gb2);display:flex;align-items:center;gap:6px"><i class="ti ti-check"></i> ${S.toast}</div>`:''}`;
 }
 
@@ -1449,8 +1456,8 @@ function rAlertaApertura(){
 function rModalEscrito(){
   const m=S._modalEscrito;if(!m)return'';
   const exp=S.db.find(e=>e.id===m.expId);if(!exp)return'';
-  return`<div style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1500;display:flex;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this){S._modalEscrito=null;render()}">
-  <div style="background:var(--bp);border-radius:12px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)" onclick="event.stopPropagation()">
+  return`<div class="mob-modal-wrap" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1500;display:flex;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this){S._modalEscrito=null;render()}">
+  <div class="mob-modal-box" style="background:var(--bp);border-radius:12px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)" onclick="event.stopPropagation()">
     <div style="padding:1rem 1.25rem .75rem;border-bottom:.5px solid var(--bt);display:flex;align-items:center;justify-content:space-between">
       <p style="font-size:15px;font-weight:600;margin:0"><i class="ti ti-file-text" style="color:var(--is);margin-right:6px"></i>Agregar escrito</p>
       <button onclick="S._modalEscrito=null;render()" style="background:none;border:none;cursor:pointer;color:var(--tt);font-size:18px"><i class="ti ti-x"></i><span class="ti-fb">✕</span></button>
@@ -1481,8 +1488,8 @@ function rModalEscrito(){
 function rModalCedula(){
   const m=S._modalCedula;if(!m)return'';
   const exp=S.db.find(e=>e.id===m.expId);if(!exp)return'';
-  return`<div style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1500;display:flex;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this){S._modalCedula=null;render()}">
-  <div style="background:var(--bp);border-radius:12px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)" onclick="event.stopPropagation()">
+  return`<div class="mob-modal-wrap" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1500;display:flex;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this){S._modalCedula=null;render()}">
+  <div class="mob-modal-box" style="background:var(--bp);border-radius:12px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)" onclick="event.stopPropagation()">
     <div style="padding:1rem 1.25rem .75rem;border-bottom:.5px solid var(--bt);display:flex;align-items:center;justify-content:space-between">
       <p style="font-size:15px;font-weight:600;margin:0"><i class="ti ti-mail" style="color:var(--ps);margin-right:6px"></i>Registrar cédula</p>
       <button onclick="S._modalCedula=null;render()" style="background:none;border:none;cursor:pointer;color:var(--tt);font-size:18px"><i class="ti ti-x"></i><span class="ti-fb">✕</span></button>
@@ -1557,8 +1564,8 @@ function rModalConcil(){
   const m=S._modalConcil;if(!m)return'';
   const exp=S.db.find(e=>e.id===m.expId);if(!exp)return'';
   const pasos=['Oferta inicial','Contraoferta','Negociación','Acuerdo tentativo','Homologado','Rechazado'];
-  return`<div style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1500;display:flex;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this){S._modalConcil=null;render()}">
-  <div style="background:var(--bp);border-radius:12px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)" onclick="event.stopPropagation()">
+  return`<div class="mob-modal-wrap" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1500;display:flex;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this){S._modalConcil=null;render()}">
+  <div class="mob-modal-box" style="background:var(--bp);border-radius:12px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)" onclick="event.stopPropagation()">
     <div style="padding:1rem 1.25rem .75rem;border-bottom:.5px solid var(--bt);display:flex;align-items:center;justify-content:space-between">
       <p style="font-size:15px;font-weight:600;margin:0"><i class="ti ti-handshake" style="color:var(--gs);margin-right:6px"></i>Registrar movimiento conciliatorio</p>
       <button onclick="S._modalConcil=null;render()" style="background:none;border:none;cursor:pointer;color:var(--tt);font-size:18px"><i class="ti ti-x"></i><span class="ti-fb">✕</span></button>
