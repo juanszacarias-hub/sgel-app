@@ -127,7 +127,7 @@ function mapExpFromAPI(e){
     montoAcordado:parseFloat(e.monto_acordado)||0,ibm:parseFloat(e.ibm)||0,incap:parseFloat(e.incap)||0,
     cliente:e.cliente||'',clienteTel:e.cliente_tel||'',folio:e.folio||'',notas:e.notas||'',
     abogado:e.abogado||'',_fecha_ultima_actuacion:e.fecha_ultima_actuacion||e.updated_at,
-    evs:[],escritos:[],cedulas:[],concil:[],log:[],_detailLoaded:false};
+    evs:[],escritos:[],cedulas:[],concil:[],log:[],adjuntos:[],_detailLoaded:false};
 }
 function mapEvFromAPI(ev){
   if(ev.tipo==='audiencia')
@@ -159,16 +159,18 @@ async function loadExpDetail(expId){
   const exp=S.db.find(e=>e.id===expId);
   if(!exp||exp._detailLoaded)return;
   try{
-    const[escRes,cedRes,concRes,logRes]=await Promise.all([
+    const[escRes,cedRes,concRes,logRes,adjRes]=await Promise.all([
       api('GET',`/escritos/expediente/${expId}`),
       api('GET',`/cedulas/expediente/${expId}`),
       api('GET',`/conciliacion/expediente/${expId}`),
-      api('GET',`/historial/expediente/${expId}`)
+      api('GET',`/historial/expediente/${expId}`),
+      api('GET',`/adjuntos/${expId}`)
     ]);
     exp.escritos=(escRes.escritos||[]).map(mapEscFromAPI);
     exp.cedulas=(cedRes.cedulas||[]).map(mapCedFromAPI);
     exp.concil=(concRes.conciliaciones||[]).map(mapConcilFromAPI);
     exp.log=(logRes.historial||[]).map(mapLogFromAPI);
+    exp.adjuntos=(adjRes.adjuntos||[]).map(mapAdjFromAPI);
     exp._detailLoaded=true;render();
   }catch(e){console.error('Error cargando detalle:',e);}
 }
@@ -567,6 +569,11 @@ function saveAlertasManuales(arr){localStorage.setItem(alertasKey(),JSON.stringi
 function crearAlertaManual(){const f=S._fna||{};if(!(f.titulo||'').trim()){toast('El título es obligatorio');return;}if(!f.fecha){toast('La fecha de vencimiento es obligatoria');return;}const arr=loadAlertasManuales();arr.push({id:Date.now(),titulo:f.titulo.trim(),desc:(f.desc||'').trim(),fecha:f.fecha,expId:f.expId||'',ts:Date.now()});saveAlertasManuales(arr);S._modalNuevaAlerta=false;render();toast('Alerta creada');}
 function eliminarAlertaManual(id){const arr=loadAlertasManuales().filter(a=>a.id!==id);saveAlertasManuales(arr);render();}
 function toast(m){S.toast=m;render();setTimeout(()=>{S.toast='';render()},2500)}
+function mapAdjFromAPI(a){return{id:a.id,nombre:a.nombre_original,tipo_mime:a.tipo_mime,tamanio:a.tamanio,url:a.url||'',ts:new Date(a.created_at).getTime()};}
+function iconMime(m){if(!m)return'ti-file';if(m.includes('pdf'))return'ti-file-type-pdf';if(m.includes('word')||m.includes('document'))return'ti-file-word';if(m.includes('excel')||m.includes('spreadsheet'))return'ti-file-spreadsheet';if(m.startsWith('image/'))return'ti-photo';return'ti-file';}
+function fmtBytes(b){if(!b)return'?';if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB';}
+async function subirAdjunto(expId,input){const file=input.files[0];if(!file)return;if(file.size>10*1024*1024){toast('El archivo supera 10MB');input.value='';return;}const fd=new FormData();fd.append('archivo',file);try{const r=await fetch(API_BASE+'/adjuntos/'+expId,{method:'POST',headers:{'Authorization':'Bearer '+getToken()},body:fd});if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error||'Error al subir');}const data=await r.json();const exp=S.db.find(e=>e.id===expId);if(exp)exp.adjuntos=(exp.adjuntos||[]).concat([mapAdjFromAPI(data.adjunto)]);render();toast('Archivo subido');}catch(e){toast('Error: '+e.message);}input.value='';}
+async function eliminarAdjunto(expId,adjId){if(!confirm('¿Eliminar este adjunto?'))return;try{await api('DELETE',`/adjuntos/${expId}/${adjId}`);const exp=S.db.find(e=>e.id===expId);if(exp)exp.adjuntos=(exp.adjuntos||[]).filter(a=>a.id!==adjId);render();toast('Adjunto eliminado');}catch(e){toast('Error: '+e.message);}}
 function addLog(expId,tipo,msg){}
 
 function aEvs(desde,hasta){const out=[];S.db.forEach(exp=>{(exp.evs||[]).forEach(ev=>{let date,color;if(ev.tipo==='audiencia'){date=new Date(ev.fecha);color='green'}else{date=new Date(ev.c.venc);color=ev.suj==='propio'?'orange':'blue'}const dl=dL(date);if(desde!==undefined&&dl<desde)return;if(hasta!==undefined&&dl>hasta)return;out.push({exp,ev,date,color,dl})})});return out.sort((a,b)=>a.date-b.date)}
@@ -787,6 +794,26 @@ ${exp.monto||exp.montoAcordado?`<div class="rbox" style="margin-bottom:10px"><di
             </div>
             ${k.notas?`<p style="font-size:11px;color:var(--ts);margin:2px 0 0">${k.notas}</p>`:''}
           </div>
+        </div>`).join('')}
+      </div>
+      <!-- ADJUNTOS -->
+      <div style="border-top:.5px solid var(--bt);margin-top:10px;padding-top:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <span class="sec" style="margin:0">Adjuntos (${(exp.adjuntos||[]).length})</span>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;background:var(--bp);border:.5px solid var(--bse);border-radius:7px;padding:4px 9px;font-size:11px;color:var(--tp)">
+            <i class="ti ti-paperclip"></i> Subir
+            <input type="file" style="display:none" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.txt,.zip" onchange="subirAdjunto('${exp.id}',this)">
+          </label>
+        </div>
+        ${(exp.adjuntos||[]).length===0?`<p style="font-size:12px;color:var(--tt);margin:0">Sin archivos adjuntos</p>`:''}
+        ${(exp.adjuntos||[]).map(a=>`<div style="display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:.5px solid var(--bt)">
+          <i class="ti ${iconMime(a.tipo_mime)}" style="font-size:14px;color:var(--is);flex-shrink:0"></i>
+          <div style="flex:1;min-width:0">
+            <p style="font-size:12px;font-weight:500;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.nombre}">${a.nombre}</p>
+            <p style="font-size:10px;color:var(--tt);margin:1px 0 0">${fmtBytes(a.tamanio)} · ${fC(new Date(a.ts))}</p>
+          </div>
+          <a href="${a.url}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:3px;background:var(--bp);border:.5px solid var(--bse);border-radius:7px;padding:3px 8px;font-size:11px;color:var(--tp);text-decoration:none"><i class="ti ti-download"></i></a>
+          <button class="btn bdng" onclick="eliminarAdjunto('${exp.id}','${a.id}')" style="padding:3px 6px"><i class="ti ti-x"></i></button>
         </div>`).join('')}
       </div>
       <div class="g2" style="gap:6px;margin-top:6px">
