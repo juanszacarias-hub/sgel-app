@@ -124,7 +124,7 @@ function mapExpFromAPI(e){
     etapa:e.etapa||'',estado:e.estado||'activo',monto:parseFloat(e.monto)||0,
     montoAcordado:parseFloat(e.monto_acordado)||0,ibm:parseFloat(e.ibm)||0,incap:parseFloat(e.incap)||0,
     cliente:e.cliente||'',clienteTel:e.cliente_tel||'',folio:e.folio||'',notas:e.notas||'',
-    _fecha_ultima_actuacion:e.fecha_ultima_actuacion||e.updated_at,
+    abogado:e.abogado||'',_fecha_ultima_actuacion:e.fecha_ultima_actuacion||e.updated_at,
     evs:[],escritos:[],cedulas:[],concil:[],log:[],_detailLoaded:false};
 }
 function mapEvFromAPI(ev){
@@ -532,7 +532,7 @@ function lg(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function ls(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 
 
-let S={view:'login',logueado:false,db:[],prof:{nombre:'',email:'',whatsapp:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}},login:{user:'',pass:'',err:''},chgPw:{a:'',n:'',c:'',err:'',ok:false},calM:HOY.getMonth(),calY:HOY.getFullYear(),expId:null,formExp:false,busq:'',ne:{cuij:'',car:'',rol:'Actor',sede:'Distrito 1',etapa:'',monto:'',montoAcordado:'',notas:'',ciudad:'',trNom:'',trJuez:'',trSec:'',trEmail:'',trTel:'',cliente:'',clienteTel:'',folio:''},ev:{step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:''},rptM:HOY.getMonth(),rptY:HOY.getFullYear(),rptExpId:null,calc:{fecha:ds(HOY),tipo:'',custom:5,desde:'nota',cf:'',tab:'plazos',ibm:'',incap:'',edad:45,factor:'1.44',adj:'20'},hist:{expId:null,fil:'todo',busq:'',_editingLog:null,_editingLogText:''},cr:{paso:1,tipo:'',ref:'',fecha:'',suj:'',expId:'',_cf:''},ref:{busq:'',sec:''},toast:'',tour:false,_tourPaso:0,_alertaClosed:false,panelDias:14,_modalEscrito:null,_modalCedula:null,_modalConcil:null,_navHist:[],_gq:'',dark:false,_modalNuevaAlerta:false,_fna:{titulo:'',desc:'',fecha:'',expId:''},rpw:{step:1,email:'',code:'',pass:'',conf:'',err:'',mostrarCodigo:''},_adu:{list:[],loaded:false,form:false,sel:null,nuevo:{nombre:'',email:'',pass:'',rol:'abogado',err:''}},_usuarioId:null};
+let S={view:'login',logueado:false,db:[],prof:{nombre:'',email:'',whatsapp:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}},login:{user:'',pass:'',err:''},chgPw:{a:'',n:'',c:'',err:'',ok:false},calM:HOY.getMonth(),calY:HOY.getFullYear(),expId:null,formExp:false,busq:'',ne:{cuij:'',car:'',rol:'Actor',sede:'Distrito 1',etapa:'',monto:'',montoAcordado:'',notas:'',ciudad:'',trNom:'',trJuez:'',trSec:'',trEmail:'',trTel:'',cliente:'',clienteTel:'',folio:''},ev:{step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:''},rptM:HOY.getMonth(),rptY:HOY.getFullYear(),rptExpId:null,calc:{fecha:ds(HOY),tipo:'',custom:5,desde:'nota',cf:'',tab:'plazos',ibm:'',incap:'',edad:45,factor:'1.44',adj:'20'},hist:{expId:null,fil:'todo',busq:'',_editingLog:null,_editingLogText:''},cr:{paso:1,tipo:'',ref:'',fecha:'',suj:'',expId:'',_cf:''},ref:{busq:'',sec:''},toast:'',tour:false,_tourPaso:0,_alertaClosed:false,panelDias:14,_modalEscrito:null,_modalCedula:null,_modalConcil:null,_navHist:[],_gq:'',dark:false,_modalNuevaAlerta:false,_fna:{titulo:'',desc:'',fecha:'',expId:''},rpw:{step:1,email:'',code:'',pass:'',conf:'',err:'',mostrarCodigo:''},_adu:{list:[],loaded:false,form:false,sel:null,nuevo:{nombre:'',email:'',pass:'',rol:'abogado',err:''}},_usuarioId:null,_agendaWo:0,_agendaAbog:''};
 
 function loadState(){}
 function saveDB(){}
@@ -575,7 +575,7 @@ function art51Pend(){return S.db.filter(exp=>{if(['sentencia','recursos','ejecuc
 function rHdr(){
   const reb=rebs().length,cad=cadInst().length,a51=art51Pend().length,alerts=reb+cad+a51;
   const nm=S.prof.nombre||'Abogado',ini=nm.split(' ').map(w=>w[0]||'').join('').substring(0,2).toUpperCase()||'AB';
-  const nav=[{v:'panel',i:'ti-layout-dashboard',l:'Panel'},{v:'carga',i:'ti-bolt',l:'Carga'},{v:'expedientes',i:'ti-files',l:'Expedientes'},{v:'historial',i:'ti-history',l:'Historial'},{v:'calendario',i:'ti-calendar',l:'Cal.'},{v:'alertas',i:'ti-bell',l:alerts?`Alertas(${alerts})`:'Alertas',d:alerts>0},{v:'reporte',i:'ti-chart-bar',l:'Reporte'},{v:'calculadora',i:'ti-calculator',l:'Calc.'},{v:'stats',i:'ti-chart-pie',l:'Stats'},{v:'referencia',i:'ti-book',l:'CPL'},{v:'busqueda',i:'ti-search',l:'Buscar'},{v:'guia',i:'ti-map-pin',l:'Guía'},...(S._usuarioRol==='admin'?[{v:'admin',i:'ti-users-group',l:'Usuarios'}]:[])];
+  const nav=[{v:'panel',i:'ti-layout-dashboard',l:'Panel'},{v:'carga',i:'ti-bolt',l:'Carga'},{v:'expedientes',i:'ti-files',l:'Expedientes'},{v:'historial',i:'ti-history',l:'Historial'},{v:'calendario',i:'ti-calendar',l:'Cal.'},{v:'agenda',i:'ti-calendar-week',l:'Agenda'},{v:'alertas',i:'ti-bell',l:alerts?`Alertas(${alerts})`:'Alertas',d:alerts>0},{v:'reporte',i:'ti-chart-bar',l:'Reporte'},{v:'calculadora',i:'ti-calculator',l:'Calc.'},{v:'stats',i:'ti-chart-pie',l:'Stats'},{v:'referencia',i:'ti-book',l:'CPL'},{v:'busqueda',i:'ti-search',l:'Buscar'},{v:'guia',i:'ti-map-pin',l:'Guía'},...(S._usuarioRol==='admin'?[{v:'admin',i:'ti-users-group',l:'Usuarios'}]:[])];
   return`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.875rem;flex-wrap:wrap;gap:7px;padding-bottom:.875rem;border-bottom:.5px solid var(--bt)"><div><p style="font-size:9px;font-family:var(--fm);color:var(--tt);margin:0;letter-spacing:.1em">SGEL · CPL SANTA FE · v3</p><h1 style="font-size:18px;font-weight:600;margin:0">Guardián Procesal</h1></div><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:5px">
         ${S._navHist.length?`<button onclick="goBack()" title="Volver atrás" style="width:34px;height:34px;border-radius:9px;border:1.5px solid var(--is);background:var(--ib);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--is);flex-shrink:0;box-shadow:0 2px 6px rgba(29,78,216,.15)"><i class="ti ti-arrow-left" style="font-size:18px;font-weight:700"></i><span class="ti-fb" style="font-size:18px;font-weight:700">←</span></button>`:''}
         <div style="display:flex;gap:2px;flex-wrap:wrap">${nav.map(n=>`<button class="nt${S.view===n.v?' on':''}" onclick="go('${n.v}')" style="${n.d?'color:var(--ds)':''}"><i class="ti ${n.i}"></i>${n.l?' '+n.l:''}</button>`).join('')}</div><div style="width:30px;height:30px;border-radius:50%;background:var(--ib);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--is);cursor:pointer;border:.5px solid var(--ib2)" onclick="go('config')">${ini}</div></div><button onclick="S.tour=true;S._tourPaso=0;render()" title="Guía de uso" style="width:30px;height:30px;border-radius:50%;background:var(--bs);border:.5px solid var(--bt);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ts);font-weight:700">?</button>
@@ -2153,6 +2153,42 @@ async function eliminarUsuario(id){
   }catch(e){toast('Error: '+e.message);}
 }
 
+// ── AGENDA DEL ESTUDIO ───────────────────────────────────────────────────
+function rAgenda(){
+  const wo=S._agendaWo||0;
+  const dow=HOY.getDay();
+  const wS=(dow===0?-6:1-dow)+wo*7,wE=wS+6;
+  const all=aEvs(wS,wE);
+  const abogs=[...new Set(S.db.map(e=>e.abogado||'').filter(Boolean))].sort();
+  const fil=S._agendaAbog||'';
+  const evs=fil?all.filter(x=>x.exp.abogado===fil):all;
+  const days=Array.from({length:7},(_,i)=>{const d=new Date(HOY);d.setDate(d.getDate()+wS+i);return{dl:wS+i,date:d};});
+  const byDl={};days.forEach(d=>byDl[d.dl]=[]);
+  evs.forEach(x=>{if(byDl[x.dl]!==undefined)byDl[x.dl].push(x);});
+  const MS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const DN=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  const d0=days[0].date,d6=days[6].date;
+  const wLabel=`${d0.getDate()} ${MS[d0.getMonth()]}${d0.getFullYear()!==d6.getFullYear()?' '+d0.getFullYear():''} – ${d6.getDate()} ${MS[d6.getMonth()]} ${d6.getFullYear()}`;
+  const total=evs.length;
+  const abogFilter=abogs.length>1?`<select class="sel" style="font-size:12px;padding:5px 9px;width:auto" onchange="S._agendaAbog=this.value;render()"><option value="">Todos los abogados</option>${abogs.map(a=>`<option value="${a}"${fil===a?' selected':''}>${a}</option>`).join('')}</select>`:'';
+  const cols=days.map((d,i)=>{
+    const isToday=d.dl===0;
+    const items=byDl[d.dl]||[];
+    const cards=items.map(x=>{
+      const car=(x.exp.car||'').length>19?(x.exp.car||'').substring(0,17)+'…':(x.exp.car||'—');
+      const esAud=x.ev.tipo==='audiencia';
+      const tit=esAud?(x.ev.desc||'Audiencia'):(TR[x.ev.tr]?.l||x.ev.tr||'Plazo');
+      const titShort=tit.length>17?tit.substring(0,15)+'…':tit;
+      const gr=esAud?(x.ev.fecha?new Date(x.ev.fecha).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',hour12:false}):'—'):(x.ev.c?.gr?`gr. ${fmt(x.ev.c.gr)}`:'—');
+      const[bg,fg,bdr]={green:['var(--gb)','var(--gs)','var(--gb2)'],orange:['var(--wb)','var(--ws)','var(--wb2)'],blue:['var(--ib)','var(--is)','var(--ib2)']}[x.color]||['var(--bs)','var(--ts)','var(--bt)'];
+      return`<div style="background:${bg};border:.5px solid ${bdr};border-radius:6px;padding:5px 7px;margin-bottom:3px"><p style="font-size:11px;font-weight:600;color:${fg};margin:0 0 1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${x.exp.car||''}">${car}</p><p style="font-size:10px;color:var(--ts);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${titShort}</p><p style="font-size:10px;color:var(--tt);margin:0">${gr}</p></div>`;
+    }).join('');
+    const empty=`<p style="font-size:10px;color:var(--tt);text-align:center;padding:8px 0;margin:0">—</p>`;
+    return`<div style="flex:1;min-width:90px"><div style="text-align:center;padding:5px 4px;border-radius:7px 7px 0 0;background:${isToday?'var(--is)':'var(--bs)'};border:.5px solid ${isToday?'var(--is)':'var(--bt)'};margin-bottom:3px"><p style="font-size:9px;font-weight:600;color:${isToday?'#fff':'var(--tt)'};margin:0;text-transform:uppercase;letter-spacing:.04em">${DN[i]}</p><p style="font-size:16px;font-weight:700;color:${isToday?'#fff':'var(--tp)'};margin:0">${d.date.getDate()}</p>${items.length?`<p style="font-size:9px;color:${isToday?'rgba(255,255,255,.75)':'var(--tt)'};margin:0">${items.length} ev.</p>`:''}</div>${items.length?cards:empty}</div>`;
+  }).join('');
+  return`${rHdr()}<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px"><div><span class="sec" style="margin:0">Agenda del estudio</span><p style="font-size:12px;color:var(--ts);margin:2px 0 0">${wLabel}${total?' · '+total+' evento'+(total!==1?'s':''):' · Sin eventos'}</p></div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${abogFilter}<div style="display:flex;gap:3px"><button class="btn" onclick="S._agendaWo=(S._agendaWo||0)-1;render()" title="Semana anterior" style="padding:5px 10px"><i class="ti ti-chevron-left"></i><span class="ti-fb">&#x2039;</span></button><button class="btn" onclick="S._agendaWo=0;render()" style="padding:5px 10px;font-size:12px${wo===0?';background:var(--ib);color:var(--is);border-color:var(--ib2)':''}">Hoy</button><button class="btn" onclick="S._agendaWo=(S._agendaWo||0)+1;render()" title="Semana siguiente" style="padding:5px 10px"><i class="ti ti-chevron-right"></i><span class="ti-fb">&#x203A;</span></button></div></div></div><div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:8px">${cols}</div>`;
+}
+
 function render(){
   document.documentElement.setAttribute('data-theme',S.dark?'dark':'');
   const el=document.getElementById('app');
@@ -2167,6 +2203,7 @@ function render(){
   else if(v==='expedientes'){const alertaHtml=(!S._alertaClosed&&!S.tour)?rAlertaApertura():'';el.innerHTML=rExp()+alertaHtml+(S.tour?rTour():'')+(S._modalEscrito?rModalEscrito():'')+(S._modalCedula?rModalCedula():'')+(S._modalConcil?rModalConcil():'');}
   else if(v==='historial')el.innerHTML=rHist();
   else if(v==='calendario')el.innerHTML=rCal();
+  else if(v==='agenda')el.innerHTML=rAgenda();
   else if(v==='alertas')el.innerHTML=rAlrt()+(S._modalNuevaAlerta?rModalNuevaAlerta():'');
   else if(v==='reporte')el.innerHTML=rRpt();
   else if(v==='calculadora')el.innerHTML=rCalc();
