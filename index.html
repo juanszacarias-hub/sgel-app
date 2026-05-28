@@ -610,9 +610,9 @@ function rHdr(){
   const reb=rebs().length,cad=cadInst().length,a51=art51Pend().length,alerts=reb+cad+a51;
   const nm=S.prof.nombre||'Abogado',ini=nm.split(' ').map(w=>w[0]||'').join('').substring(0,2).toUpperCase()||'AB';
   const nav=[{v:'panel',i:'ti-layout-dashboard',l:'Panel'},{v:'carga',i:'ti-bolt',l:'Carga'},{v:'expedientes',i:'ti-files',l:'Expedientes'},{v:'historial',i:'ti-history',l:'Historial'},{v:'calendario',i:'ti-calendar',l:'Cal.'},{v:'agenda',i:'ti-calendar-week',l:'Agenda'},{v:'alertas',i:'ti-bell',l:alerts?`Alertas(${alerts})`:'Alertas',d:alerts>0},{v:'reporte',i:'ti-chart-bar',l:'Reporte'},{v:'calculadora',i:'ti-calculator',l:'Calc.'},{v:'stats',i:'ti-chart-pie',l:'Stats'},{v:'referencia',i:'ti-book',l:'CPL'},{v:'busqueda',i:'ti-search',l:'Buscar'},{v:'guia',i:'ti-map-pin',l:'Guía'},...(S._usuarioRol==='admin'?[{v:'admin',i:'ti-users-group',l:'Usuarios'}]:[])];
-  const MOB=['panel','expedientes','carga','alertas','calendario'];
-  const mobMain=nav.filter(n=>MOB.includes(n.v));
-  const mobMas=nav.filter(n=>!MOB.includes(n.v));
+  const MOB=new Set(['panel','expedientes','carga','alertas','calendario','config']);
+  const mobMain=nav.filter(n=>['panel','expedientes','carga','alertas','calendario'].includes(n.v));
+  const mobMas=nav.filter(n=>!MOB.has(n.v));
   const mBtn=n=>`<button class="nt${S.view===n.v?' on':''}" onclick="S._navMas=false;go('${n.v}')" style="flex:1;padding:0;height:100%;justify-content:center;font-size:16px;border-radius:0;border:none${n.d?';color:var(--ds)':''}"><i class="ti ${n.i}"></i><span class="ti-fb" style="font-size:12px">${n.l.split('(')[0]}</span></button>`;
   const cfgB=`<button class="nt${S.view==='config'?' on':''}" onclick="S._navMas=false;go('config')" style="flex:1;padding:0;height:100%;justify-content:center;border-radius:0;border:none"><div style="width:28px;height:28px;border-radius:50%;background:var(--ib);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--is)">${ini}</div></button>`;
   const masB=`<button onclick="S._navMas=!S._navMas;render()" style="flex:1;padding:0;height:100%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;color:${S._navMas?'var(--ib)':'var(--ts)'}">⋯</button>`;
