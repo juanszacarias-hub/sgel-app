@@ -106,7 +106,7 @@ body{font-family:var(--fs);font-size:14px;color:var(--tp);background:#f1f5f9;min
 // ── API LAYER ─────────────────────────────────────────────────────────────────
 const API_BASE='https://sgel-backend-production.up.railway.app/api';
 // Reemplazar con la clave pública generada por: npx web-push generate-vapid-keys
-const VAPID_PUBLIC_KEY='YOUR_VAPID_PUBLIC_KEY';
+const VAPID_PUBLIC_KEY='BLtvJq39cgTp62v1VC1A9J4tpZxYcdaILeVgMvwbyjlSFCo-_6jSfgPp40h7OP-QNQGLspN-L6nAbNQ1E85UMbs';
 function getToken(){return sessionStorage.getItem('sgel_jwt')||'';}
 function setToken(t){sessionStorage.setItem('sgel_jwt',t);}
 function clearToken(){sessionStorage.removeItem('sgel_jwt');}
