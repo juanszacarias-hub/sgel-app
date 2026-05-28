@@ -32,15 +32,15 @@ body{font-family:var(--fs);font-size:14px;color:var(--tp);background:#f1f5f9;min
   h2{font-size:16px!important}
   .sec{font-size:10px!important}
   .mc{padding:.625rem!important}
-  /* Nav: scroll horizontal con solo íconos */
-  .nav-scroll{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(50px,1fr));width:100%}
-  .nt{padding:6px 4px!important;min-width:0;justify-content:center!important}
+  /* Nav: fila única, ícono centrado, sin texto */
+  .nav-scroll{display:flex!important;flex-wrap:nowrap!important;overflow:hidden;width:100%}
+  .nav-scroll .nt{flex:1;padding:0!important;height:44px;min-width:0!important;justify-content:center!important;font-size:14px}
   /* Modales: bottom-sheet */
   .mob-modal-wrap{align-items:flex-end!important;padding:0!important}
   .mob-modal-box{border-radius:16px 16px 0 0!important;max-width:100%!important;width:100%!important;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 }
 @media(max-width:360px){
-  .nt{padding:6px 8px!important;min-width:36px}
+  .nav-scroll .nt{font-size:12px}
 }
 #shell{max-width:900px;margin:0 auto;background:var(--bp);min-height:100vh;padding:1rem 1.25rem 4rem}
 .nt{cursor:pointer;padding:5px 10px;border-radius:6px;font-size:12px;border:.5px solid transparent;color:var(--ts);background:none;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
