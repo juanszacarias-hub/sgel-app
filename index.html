@@ -812,8 +812,8 @@ ${exp.monto||exp.montoAcordado?`<div class="rbox" style="margin-bottom:10px"><di
             <p style="font-size:12px;font-weight:500;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.nombre}">${a.nombre}</p>
             <p style="font-size:10px;color:var(--tt);margin:1px 0 0">${fmtBytes(a.tamanio)} · ${fC(new Date(a.ts))}</p>
           </div>
-          <a href="${a.url}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:3px;background:var(--bp);border:.5px solid var(--bse);border-radius:7px;padding:3px 8px;font-size:11px;color:var(--tp);text-decoration:none"><i class="ti ti-download"></i></a>
-          <button class="btn bdng" onclick="eliminarAdjunto('${exp.id}','${a.id}')" style="padding:3px 6px"><i class="ti ti-x"></i></button>
+          <a href="${a.url}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:3px;background:var(--bp);border:.5px solid var(--bse);border-radius:7px;padding:3px 8px;font-size:11px;color:var(--tp);text-decoration:none"><i class="ti ti-download"></i><span class="ti-fb">↓ Descargar</span></a>
+          <button class="btn bdng" onclick="eliminarAdjunto('${exp.id}','${a.id}')" style="padding:3px 6px"><i class="ti ti-x"></i><span class="ti-fb">✕</span></button>
         </div>`).join('')}
       </div>
       <div class="g2" style="gap:6px;margin-top:6px">
