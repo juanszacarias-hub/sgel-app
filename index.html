@@ -43,10 +43,37 @@ body{font-family:var(--fs);font-size:14px;color:var(--tp);background:#f1f5f9;min
 @media(max-width:360px){
   .nav-scroll .nt{font-size:12px}
 }
+@media print{
+  @page{margin:2cm 1.5cm;size:A4 portrait}
+  /* Forzar colores claros incluso en modo oscuro */
+  :root,[data-theme="dark"]{
+    --tp:#000;--ts:#333;--tt:#666;
+    --bp:#fff;--bs:#f8f8f8;--bt:#ccc;--bse:#aaa;
+    --is:#1a56db;--ib:#eff6ff;--ib2:#93c5fd;
+    --ds:#c0392b;--db:#fff0f0;--db2:#f5a5a5;
+    --gs:#16a34a;--gb:#f0fdf4;--gb2:#86efac;
+    --ws:#92400e;--wb:#fffbeb;--wb2:#fcd34d;
+  }
+  body{font-size:12pt!important;background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #shell{max-width:100%!important;padding:1cm 0 0!important;margin:0!important;min-height:0!important;background:#fff!important}
+  /* Ocultar chrome de navegación y overlays */
+  .no-print,.mob-nav-bar,button,[style*="position:fixed"]{display:none!important}
+  /* Encabezado fijo que se repite en cada página */
+  .print-hdr{display:flex!important;position:fixed;top:0;left:0;right:0;font-size:9pt;color:#333;border-bottom:1pt solid #ccc;padding:3pt 10pt;background:#fff;justify-content:space-between;align-items:center;z-index:1}
+  /* Tarjetas y secciones legibles */
+  .card{border:1pt solid #ccc!important;break-inside:avoid;margin-bottom:8pt!important;box-shadow:none!important;background:#fff!important}
+  .ad,.mc,.sec{break-inside:avoid}
+  .g4{grid-template-columns:repeat(4,1fr)!important}
+  h2{font-size:14pt!important;color:#000!important}
+  p,span,label{color:#000!important}
+  a{color:#000!important;text-decoration:none!important}
+  input,select,textarea{color:#000!important;background:#fff!important;border:1pt solid #ccc!important}
+}
 #shell{max-width:900px;margin:0 auto;background:var(--bp);min-height:100vh;padding:1rem 1.25rem 4rem}
 .nt{cursor:pointer;padding:5px 10px;border-radius:6px;font-size:12px;border:.5px solid transparent;color:var(--ts);background:none;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
 .mob-nav-bar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:900;background:var(--bp);border-top:.5px solid var(--bt);height:56px;align-items:stretch}
 .mob-nav-bar .nt{flex:1;padding:0!important;height:100%!important;justify-content:center!important;font-size:16px!important;border-radius:0!important;border:none!important}
+.print-hdr{display:none}
 .nt.on{background:var(--bs);border-color:var(--bt);color:var(--tp);font-weight:500}
 .nt:hover:not(.on){background:var(--bs)}
 .card{background:var(--bp);border:.5px solid var(--bt);border-radius:10px;padding:1rem 1.125rem;margin-bottom:8px}
@@ -618,10 +645,10 @@ function rHdr(){
   const masB=`<button onclick="S._navMas=!S._navMas;render()" style="flex:1;padding:0;height:100%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;color:${S._navMas?'var(--ib)':'var(--ts)'}">⋯</button>`;
   const masDrawer=(S._navMas&&window.innerWidth<=480)?`<div onclick="S._navMas=false;render()" style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:901;display:flex;align-items:flex-end"><div onclick="event.stopPropagation()" style="width:100%;background:var(--bp);border-top:.5px solid var(--bt);border-radius:14px 14px 0 0;padding:.875rem;margin-bottom:56px"><p style="font-size:10px;font-weight:600;color:var(--tt);text-transform:uppercase;letter-spacing:.07em;margin:0 0 10px">Más opciones</p><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">${mobMas.map(n=>`<button class="nt${S.view===n.v?' on':''}" onclick="S._navMas=false;go('${n.v}')" style="display:flex!important;flex-direction:column;gap:2px;padding:8px 4px;height:60px;width:100%;justify-content:center;align-items:center;border-radius:8px;border:.5px solid var(--bt)${n.d?';color:var(--ds)':''}"><i class="ti ${n.i}" style="font-size:18px"></i><span class="ti-fb" style="font-size:11px">${n.l.split('(')[0]}</span><span style="font-size:10px;color:var(--ts);line-height:1">${n.l.split('(')[0]}</span></button>`).join('')}</div></div></div>`:'';
   const mobBar=`<div class="mob-nav-bar">${mobMain.map(mBtn).join('')}${cfgB}${masB}</div>`;
-  return`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.875rem;flex-wrap:wrap;gap:7px;padding-bottom:.875rem;border-bottom:.5px solid var(--bt)"><div style="display:flex;align-items:center;gap:8px">${sgelLogo(30)}<div><p style="font-size:11px;font-weight:700;margin:0;color:var(--tp)">SGEL</p><p style="font-size:9px;color:var(--ts);margin:0">Guardián Procesal</p></div></div><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:5px">
+  return`<div class="print-hdr"><span style="font-weight:600">${S.prof.nombre||'SGEL Guardián Procesal'}</span><span>${new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})}</span></div><div class="no-print" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.875rem;flex-wrap:wrap;gap:7px;padding-bottom:.875rem;border-bottom:.5px solid var(--bt)"><div style="display:flex;align-items:center;gap:8px">${sgelLogo(30)}<div><p style="font-size:11px;font-weight:700;margin:0;color:var(--tp)">SGEL</p><p style="font-size:9px;color:var(--ts);margin:0">Guardián Procesal</p></div></div><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:5px">
         ${S._navHist.length?`<button onclick="goBack()" title="Volver atrás" style="width:34px;height:34px;border-radius:9px;border:1.5px solid var(--is);background:var(--ib);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--is);flex-shrink:0;box-shadow:0 2px 6px rgba(29,78,216,.15)"><i class="ti ti-arrow-left" style="font-size:18px;font-weight:700"></i><span class="ti-fb" style="font-size:18px;font-weight:700">←</span></button>`:''}
         <div class="nav-scroll" style="display:flex;gap:2px;flex-wrap:wrap">${nav.map(n=>`<button class="nt${S.view===n.v?' on':''}" onclick="go('${n.v}')" style="${n.d?'color:var(--ds)':''}"><i class="ti ${n.i}"></i>${n.l?'<span class="ti-fb"> '+n.l+'</span>':''}</button>`).join('')}</div><div style="width:30px;height:30px;border-radius:50%;background:var(--ib);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--is);cursor:pointer;border:.5px solid var(--ib2)" onclick="go('config')">${ini}</div></div><button onclick="S.tour=true;S._tourPaso=0;render()" title="Guía de uso" style="width:30px;height:30px;border-radius:50%;background:var(--bs);border:.5px solid var(--bt);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ts);font-weight:700">?</button>
-    <button onclick="S.dark=!S.dark;saveProf();render()" title="${S.dark?'Modo claro':'Modo oscuro'}" style="width:30px;height:30px;border-radius:50%;background:var(--bs);border:.5px solid var(--bt);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--ts)"><i class="ti ${S.dark?'ti-sun':'ti-moon'}"></i><span class="ti-fb">${S.dark?'☀':'🌙'}</span></button></div></div></div>${mobBar}${masDrawer}${S.toast?`<div style="background:${S.toastErr?'var(--db)':'var(--gb)'};color:${S.toastErr?'var(--ds)':'var(--gs)'};padding:7px 14px;border-radius:7px;font-size:12px;margin-bottom:10px;border:.5px solid ${S.toastErr?'var(--db2)':'var(--gb2)'};display:flex;align-items:center;gap:6px"><i class="ti ${S.toastErr?'ti-alert-triangle':'ti-check'}"></i><span class="ti-fb">${S.toastErr?'⚠':'✓'}</span> ${S.toast}</div>`:''}`;
+    <button onclick="S.dark=!S.dark;saveProf();render()" title="${S.dark?'Modo claro':'Modo oscuro'}" style="width:30px;height:30px;border-radius:50%;background:var(--bs);border:.5px solid var(--bt);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--ts)"><i class="ti ${S.dark?'ti-sun':'ti-moon'}"></i><span class="ti-fb">${S.dark?'☀':'🌙'}</span></button></div></div></div>${mobBar}${masDrawer}${S.toast?`<div class="no-print" style="background:${S.toastErr?'var(--db)':'var(--gb)'};color:${S.toastErr?'var(--ds)':'var(--gs)'};padding:7px 14px;border-radius:7px;font-size:12px;margin-bottom:10px;border:.5px solid ${S.toastErr?'var(--db2)':'var(--gb2)'};display:flex;align-items:center;gap:6px"><i class="ti ${S.toastErr?'ti-alert-triangle':'ti-check'}"></i><span class="ti-fb">${S.toastErr?'⚠':'✓'}</span> ${S.toast}</div>`:''}`;
 }
 
 function sgelLogo(sz){return`<svg width="${sz}" height="${sz}" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="48" rx="11" fill="#1d4ed8"/><text x="24" y="32" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" font-weight="800" font-size="16" letter-spacing="2" fill="white">SGEL</text></svg>`;}
