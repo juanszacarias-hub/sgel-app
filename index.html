@@ -561,8 +561,9 @@ async function loadPreferencias(){
     localStorage.setItem('sgel_dark',S.dark?'1':'0');
   }catch(e){}
 }
-function loadAlertasManuales(){try{return JSON.parse(localStorage.getItem('sgel_alertas_manuales')||'[]');}catch(e){return[];}}
-function saveAlertasManuales(arr){localStorage.setItem('sgel_alertas_manuales',JSON.stringify(arr));}
+function alertasKey(){return'sgel_alertas_manuales_'+(S._usuarioId||'anon');}
+function loadAlertasManuales(){try{return JSON.parse(localStorage.getItem(alertasKey())||'[]');}catch(e){return[];}}
+function saveAlertasManuales(arr){localStorage.setItem(alertasKey(),JSON.stringify(arr));}
 function crearAlertaManual(){const f=S._fna||{};if(!(f.titulo||'').trim()){toast('El título es obligatorio');return;}if(!f.fecha){toast('La fecha de vencimiento es obligatoria');return;}const arr=loadAlertasManuales();arr.push({id:Date.now(),titulo:f.titulo.trim(),desc:(f.desc||'').trim(),fecha:f.fecha,expId:f.expId||'',ts:Date.now()});saveAlertasManuales(arr);S._modalNuevaAlerta=false;render();toast('Alerta creada');}
 function eliminarAlertaManual(id){const arr=loadAlertasManuales().filter(a=>a.id!==id);saveAlertasManuales(arr);render();}
 function toast(m){S.toast=m;render();setTimeout(()=>{S.toast='';render()},2500)}
