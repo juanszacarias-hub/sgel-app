@@ -105,6 +105,8 @@ body{font-family:var(--fs);font-size:14px;color:var(--tp);background:#f1f5f9;min
 <script>
 // ── API LAYER ─────────────────────────────────────────────────────────────────
 const API_BASE='https://sgel-backend-production.up.railway.app/api';
+// Reemplazar con la clave pública generada por: npx web-push generate-vapid-keys
+const VAPID_PUBLIC_KEY='YOUR_VAPID_PUBLIC_KEY';
 function getToken(){return sessionStorage.getItem('sgel_jwt')||'';}
 function setToken(t){sessionStorage.setItem('sgel_jwt',t);}
 function clearToken(){sessionStorage.removeItem('sgel_jwt');}
@@ -191,7 +193,7 @@ async function initApp(){
     const me=await api('GET','/auth/me');
     S.prof.nombre=me.usuario.nombre;S.prof.email=me.usuario.email;
     S._usuarioRol=me.usuario.rol;S._usuarioId=me.usuario.id;S.logueado=true;S._alertaClosed=false;
-    await loadPreferencias();await refreshTodos();go('panel');
+    await loadPreferencias();await refreshTodos();initPush();go('panel');
   }catch(e){clearToken();render();}
 }
 // ─────────────────────────────────────────────────────────────────────────────
@@ -532,7 +534,7 @@ function lg(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function ls(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 
 
-let S={view:'login',logueado:false,db:[],prof:{nombre:'',email:'',whatsapp:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}},login:{user:'',pass:'',err:''},chgPw:{a:'',n:'',c:'',err:'',ok:false},calM:HOY.getMonth(),calY:HOY.getFullYear(),expId:null,formExp:false,busq:'',ne:{cuij:'',car:'',rol:'Actor',sede:'Distrito 1',etapa:'',monto:'',montoAcordado:'',notas:'',ciudad:'',trNom:'',trJuez:'',trSec:'',trEmail:'',trTel:'',cliente:'',clienteTel:'',folio:''},ev:{step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:''},rptM:HOY.getMonth(),rptY:HOY.getFullYear(),rptExpId:null,calc:{fecha:ds(HOY),tipo:'',custom:5,desde:'nota',cf:'',tab:'plazos',ibm:'',incap:'',edad:45,factor:'1.44',adj:'20'},hist:{expId:null,fil:'todo',busq:'',_editingLog:null,_editingLogText:''},cr:{paso:1,tipo:'',ref:'',fecha:'',suj:'',expId:'',_cf:''},ref:{busq:'',sec:''},toast:'',tour:false,_tourPaso:0,_alertaClosed:false,panelDias:14,_modalEscrito:null,_modalCedula:null,_modalConcil:null,_navHist:[],_gq:'',dark:false,_modalNuevaAlerta:false,_fna:{titulo:'',desc:'',fecha:'',expId:''},rpw:{step:1,email:'',code:'',pass:'',conf:'',err:'',mostrarCodigo:''},_adu:{list:[],loaded:false,form:false,sel:null,nuevo:{nombre:'',email:'',pass:'',rol:'abogado',err:''}},_usuarioId:null,_agendaWo:0,_agendaAbog:''};
+let S={view:'login',logueado:false,db:[],prof:{nombre:'',email:'',whatsapp:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}},login:{user:'',pass:'',err:''},chgPw:{a:'',n:'',c:'',err:'',ok:false},calM:HOY.getMonth(),calY:HOY.getFullYear(),expId:null,formExp:false,busq:'',ne:{cuij:'',car:'',rol:'Actor',sede:'Distrito 1',etapa:'',monto:'',montoAcordado:'',notas:'',ciudad:'',trNom:'',trJuez:'',trSec:'',trEmail:'',trTel:'',cliente:'',clienteTel:'',folio:''},ev:{step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:''},rptM:HOY.getMonth(),rptY:HOY.getFullYear(),rptExpId:null,calc:{fecha:ds(HOY),tipo:'',custom:5,desde:'nota',cf:'',tab:'plazos',ibm:'',incap:'',edad:45,factor:'1.44',adj:'20'},hist:{expId:null,fil:'todo',busq:'',_editingLog:null,_editingLogText:''},cr:{paso:1,tipo:'',ref:'',fecha:'',suj:'',expId:'',_cf:''},ref:{busq:'',sec:''},toast:'',tour:false,_tourPaso:0,_alertaClosed:false,panelDias:14,_modalEscrito:null,_modalCedula:null,_modalConcil:null,_navHist:[],_gq:'',dark:false,_modalNuevaAlerta:false,_fna:{titulo:'',desc:'',fecha:'',expId:''},rpw:{step:1,email:'',code:'',pass:'',conf:'',err:'',mostrarCodigo:''},_adu:{list:[],loaded:false,form:false,sel:null,nuevo:{nombre:'',email:'',pass:'',rol:'abogado',err:''}},_usuarioId:null,_agendaWo:0,_agendaAbog:'',_pushState:'idle',_pushSub:null};
 
 function loadState(){}
 function saveDB(){}
@@ -591,7 +593,7 @@ async function doLogin(){
     if(!resp.ok)throw new Error(r.error||'Credenciales incorrectas');
     setToken(r.token);S.prof.nombre=r.usuario.nombre;S.prof.email=r.usuario.email;
     S._usuarioRol=r.usuario.rol;S._usuarioId=r.usuario.id;S.logueado=true;S.login.err='';S._alertaClosed=false;
-    await loadPreferencias();await refreshTodos();go('panel');
+    await loadPreferencias();await refreshTodos();initPush();go('panel');
   }catch(e){S.login.err=e.message||'Credenciales incorrectas';render();}
 }
 function doLogout(){clearToken();S.logueado=false;S.db=[];S.view='login';S.login={user:'',pass:'',err:''};render();}
@@ -1047,7 +1049,7 @@ async function importarBackup(input){
     if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-upload"></i><span class="ti-fb">&#x2191;</span> Importar backup';}
   }
 }
-function rCfg(){const n=S.prof.notif||{};return`${rHdr()}<span class="sec">Perfil del estudio</span><div class="card" style="margin-bottom:12px"><div style="display:grid;gap:10px"><div><span class="lbl">Nombre / Estudio</span><input class="inp" type="text" value="${S.prof.nombre||''}" oninput="S.prof.nombre=this.value" placeholder="Dr. Nombre Apellido"></div><div class="g2"><div><span class="lbl">Email</span><input class="inp" type="email" value="${S.prof.email||''}" oninput="S.prof.email=this.value" placeholder="nombre@estudio.com"></div><div><span class="lbl">WhatsApp</span><input class="inp" type="text" value="${S.prof.whatsapp||''}" oninput="S.prof.whatsapp=this.value" placeholder="+54 342 000-0000"></div></div><button class="bok" onclick="saveProf();toast('Perfil guardado')"><i class="ti ti-check"></i> Guardar</button></div></div><span class="sec">Notificaciones</span><div class="card" style="margin-bottom:12px">${[['aud48',cD('green'),'Audiencias 48hs antes'],['venc24',cD('orange'),'Vencimientos 24hs antes'],['radar',cD('red'),'Radar rebeldía'],['vig7',cD('blue'),'Vigilancia 7 días'],['caducidad','#7c3aed','Riesgo caducidad (>1 año)']].map(([k,c,t])=>`<div class="rr"><div style="display:flex;gap:8px;align-items:center"><span class="dot" style="background:${c}"></span><span style="font-size:13px">${t}</span></div><div class="tog${n[k]!==false?' on':''}" onclick="S.prof.notif['${k}']=!(S.prof.notif['${k}']!==false);render()"></div></div>`).join('')}<div style="padding-top:8px"><button class="bok" onclick="saveProf();toast('Guardado')"><i class="ti ti-check"></i> Guardar</button></div></div><span class="sec">IBM — Ingreso Base Mensual</span>
+function rCfg(){const n=S.prof.notif||{};return`${rHdr()}<span class="sec">Perfil del estudio</span><div class="card" style="margin-bottom:12px"><div style="display:grid;gap:10px"><div><span class="lbl">Nombre / Estudio</span><input class="inp" type="text" value="${S.prof.nombre||''}" oninput="S.prof.nombre=this.value" placeholder="Dr. Nombre Apellido"></div><div class="g2"><div><span class="lbl">Email</span><input class="inp" type="email" value="${S.prof.email||''}" oninput="S.prof.email=this.value" placeholder="nombre@estudio.com"></div><div><span class="lbl">WhatsApp</span><input class="inp" type="text" value="${S.prof.whatsapp||''}" oninput="S.prof.whatsapp=this.value" placeholder="+54 342 000-0000"></div></div><button class="bok" onclick="saveProf();toast('Perfil guardado')"><i class="ti ti-check"></i> Guardar</button></div></div><span class="sec">Notificaciones</span><div class="card" style="margin-bottom:12px">${[['aud48',cD('green'),'Audiencias 48hs antes'],['venc24',cD('orange'),'Vencimientos 24hs antes'],['radar',cD('red'),'Radar rebeldía'],['vig7',cD('blue'),'Vigilancia 7 días'],['caducidad','#7c3aed','Riesgo caducidad (>1 año)']].map(([k,c,t])=>`<div class="rr"><div style="display:flex;gap:8px;align-items:center"><span class="dot" style="background:${c}"></span><span style="font-size:13px">${t}</span></div><div class="tog${n[k]!==false?' on':''}" onclick="S.prof.notif['${k}']=!(S.prof.notif['${k}']!==false);render()"></div></div>`).join('')}<div style="padding-top:8px"><button class="bok" onclick="saveProf();toast('Guardado')"><i class="ti ti-check"></i> Guardar</button></div></div><span class="sec">Notificaciones push</span><div class="card" style="margin-bottom:12px">${rPushUI()}</div><span class="sec">IBM — Ingreso Base Mensual</span>
 <div class="card" style="margin-bottom:12px">
   <div style="background:var(--wb);border:.5px solid var(--wb2);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:var(--ws)">
     <strong>¿Qué es el IBM?</strong> Es el ingreso mensual que usa la SRT para calcular indemnizaciones LRT. Se actualiza periódicamente. Consultá el valor vigente en el sitio de la SRT y actualizalo aquí para que la calculadora lo use automáticamente.
@@ -2151,6 +2153,48 @@ async function eliminarUsuario(id){
     S._adu.list=S._adu.list.filter(x=>x.id!==id);S._adu.sel=null;
     render();toast('Usuario eliminado');
   }catch(e){toast('Error: '+e.message);}
+}
+
+// ── WEB PUSH ─────────────────────────────────────────────────────────────
+function urlB64ToUint8(b){const p='='.repeat((4-b.length%4)%4);const s=(b+p).replace(/-/g,'+').replace(/_/g,'/');const r=atob(s);return Uint8Array.from([...r].map(c=>c.charCodeAt(0)));}
+async function initPush(){
+  if(!('serviceWorker' in navigator&&'PushManager' in window)){S._pushState='unsupported';return;}
+  try{
+    const reg=await navigator.serviceWorker.register('./sw.js');
+    const sub=await reg.pushManager.getSubscription();
+    if(sub){S._pushSub=sub;S._pushState='subscribed';}
+    else S._pushState=Notification.permission==='denied'?'denied':'idle';
+  }catch(e){console.error('[push] initPush:',e);S._pushState='unsupported';}
+  render();
+}
+async function suscribirPush(){
+  if(VAPID_PUBLIC_KEY==='YOUR_VAPID_PUBLIC_KEY'){toast('Configurar VAPID_PUBLIC_KEY primero');return;}
+  S._pushState='loading';render();
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){S._pushState='denied';render();return;}
+    const reg=await navigator.serviceWorker.ready;
+    const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64ToUint8(VAPID_PUBLIC_KEY)});
+    const j=sub.toJSON();
+    await api('POST','/notificaciones/suscribir',{endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth});
+    S._pushSub=sub;S._pushState='subscribed';render();toast('Notificaciones push activadas');
+  }catch(e){console.error('[push] suscribirPush:',e);S._pushState='idle';render();toast('Error: '+e.message);}
+}
+async function desuscribirPush(){
+  try{
+    if(S._pushSub){const j=S._pushSub.toJSON();await api('DELETE','/notificaciones/suscribir',{endpoint:j.endpoint});await S._pushSub.unsubscribe();S._pushSub=null;}
+    S._pushState='idle';render();toast('Notificaciones push desactivadas');
+  }catch(e){toast('Error: '+e.message);}
+}
+function rPushUI(){
+  if(!('serviceWorker' in navigator&&'PushManager' in window))
+    return`<p style="font-size:12px;color:var(--tt);margin:0">Tu navegador no soporta notificaciones push.</p>`;
+  const st=S._pushState||'idle';
+  if(st==='unsupported')return`<p style="font-size:12px;color:var(--tt);margin:0">No soportado en este navegador.</p>`;
+  if(st==='loading')return`<div class="rr"><span style="font-size:13px">Notificaciones push</span><span style="font-size:12px;color:var(--tt)"><i class="ti ti-loader-2"></i> Activando...</span></div>`;
+  if(st==='denied')return`<div class="rr"><span style="font-size:13px">Notificaciones push</span><div style="display:flex;align-items:center;gap:6px"><span class="bdg" style="background:var(--db);color:var(--ds)">Bloqueadas</span><span style="font-size:11px;color:var(--tt)">Habilitá el permiso en el navegador</span></div></div>`;
+  if(st==='subscribed')return`<div class="rr"><span style="font-size:13px;color:var(--gs)"><i class="ti ti-bell-ringing"></i> Push activas en este dispositivo</span><button class="btn" onclick="desuscribirPush()" style="font-size:12px;padding:5px 10px;color:var(--ds);border-color:var(--db2);background:var(--db)"><i class="ti ti-bell-off"></i> Desactivar</button></div>`;
+  return`<div class="rr"><span style="font-size:13px">Notificaciones push</span><button class="btn" onclick="suscribirPush()" style="font-size:12px;padding:5px 10px;color:var(--gs);border-color:var(--gb2);background:var(--gb)"><i class="ti ti-bell"></i> Activar</button></div>`;
 }
 
 // ── AGENDA DEL ESTUDIO ───────────────────────────────────────────────────
