@@ -646,7 +646,7 @@ function rHdr(){
   const mBtn=n=>`<button class="nt${S.view===n.v?' on':''}" onclick="S._navMas=false;go('${n.v}')" style="flex:1;padding:0;height:100%;justify-content:center;font-size:16px;border-radius:0;border:none${n.d?';color:var(--ds)':''}"><i class="ti ${n.i}"></i><span class="ti-fb" style="font-size:12px">${n.l.split('(')[0]}</span></button>`;
   const cfgB=`<button class="nt${S.view==='config'?' on':''}" onclick="S._navMas=false;go('config')" style="flex:1;padding:0;height:100%;justify-content:center;border-radius:0;border:none"><div style="width:28px;height:28px;border-radius:50%;background:var(--ib);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--is)">${ini}</div></button>`;
   const masB=`<button onclick="S._navMas=!S._navMas;render()" style="flex:1;padding:0;height:100%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;color:${S._navMas?'var(--ib)':'var(--ts)'}">⋯</button>`;
-  const masDrawer=S._navMas?`<div class="mob-mas-overlay" onclick="S._navMas=false;render()"><div onclick="event.stopPropagation()" style="width:100%;background:var(--bp);border-top:.5px solid var(--bt);border-radius:14px 14px 0 0;padding:.875rem;margin-bottom:56px"><p style="font-size:10px;font-weight:600;color:var(--tt);text-transform:uppercase;letter-spacing:.07em;margin:0 0 10px">Más opciones</p><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">${mobMas.map(n=>`<button class="nt${S.view===n.v?' on':''}" onclick="S._navMas=false;go('${n.v}')" style="display:flex!important;flex-direction:column;gap:2px;padding:8px 4px;height:60px;width:100%;justify-content:center;align-items:center;border-radius:8px;border:.5px solid var(--bt)${n.d?';color:var(--ds)':''}"><i class="ti ${n.i}" style="font-size:18px"></i><span class="ti-fb" style="font-size:11px">${n.l.split('(')[0]}</span><span style="font-size:10px;color:var(--ts);line-height:1">${n.l.split('(')[0]}</span></button>`).join('')}</div></div></div>`:'';
+  const masDrawer=S._navMas?`<div class="mob-mas-overlay" onclick="S._navMas=false;render()"><div onclick="event.stopPropagation()" style="width:100%;background:var(--bp);border-top:.5px solid var(--bt);border-radius:14px 14px 0 0;padding:.875rem;margin-bottom:56px"><p style="font-size:10px;font-weight:600;color:var(--tt);text-transform:uppercase;letter-spacing:.07em;margin:0 0 10px">Más opciones</p><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">${mobMas.map(n=>`<button class="nt${S.view===n.v?' on':''}" onclick="S._navMas=false;go('${n.v}')" style="display:flex!important;flex-direction:column;gap:2px;padding:8px 4px;height:60px;width:100%;justify-content:center;align-items:center;border-radius:8px;border:.5px solid var(--bt)${n.d?';color:var(--ds)':''}"><i class="ti ${n.i}" style="font-size:18px"></i><span style="font-size:10px;color:var(--ts);line-height:1">${n.l.split('(')[0]}</span></button>`).join('')}</div></div></div>`:'';
   const mobBar=`<div class="mob-nav-bar">${mobMain.map(mBtn).join('')}${cfgB}${masB}</div>`;
   return`<div class="print-hdr"><span style="font-weight:600">${S.prof.nombre||'SGEL Guardián Procesal'}</span><span>${new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})}</span></div><div class="no-print" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.875rem;flex-wrap:wrap;gap:7px;padding-bottom:.875rem;border-bottom:.5px solid var(--bt)"><div style="display:flex;align-items:center;gap:8px">${sgelLogo(30)}<div><p style="font-size:11px;font-weight:700;margin:0;color:var(--tp)">SGEL</p><p style="font-size:9px;color:var(--ts);margin:0">Guardián Procesal</p></div></div><div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:5px">
         ${S._navHist.length?`<button onclick="goBack()" title="Volver atrás" style="width:34px;height:34px;border-radius:9px;border:1.5px solid var(--is);background:var(--ib);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--is);flex-shrink:0;box-shadow:0 2px 6px rgba(29,78,216,.15)"><i class="ti ti-arrow-left" style="font-size:18px;font-weight:700"></i><span class="ti-fb" style="font-size:18px;font-weight:700">←</span></button>`:''}
@@ -2346,12 +2346,19 @@ async function desuscribirPush(){
   }catch(e){toast('Error: '+e.message);}
 }
 async function testWhatsApp(){
+  console.log('[testWhatsApp] inicio — whatsapp:', S.prof.whatsapp||'(vacío)', '| apiKey:', S.prof.whatsappApiKey?'***'+S.prof.whatsappApiKey.slice(-3):'(vacío)');
   try{
     toast('Enviando WhatsApp de prueba...');
-    await api('POST','/notificaciones/test-whatsapp');
+    console.log('[testWhatsApp] llamando API...');
+    const data=await api('POST','/notificaciones/test-whatsapp');
+    console.log('[testWhatsApp] respuesta OK:', data);
     toast('✅ WhatsApp enviado — revisá tu teléfono');
   }catch(e){
-    toast(e.message||'Error al enviar WhatsApp de prueba',true);
+    // api() ya llama toast() internamente para errores HTTP;
+    // solo loguear aquí para no sobreescribir ese mensaje con uno menos útil
+    console.error('[testWhatsApp] error:', e.message, e);
+    // Si api() NO llegó a hacer toast (ej: error inesperado fuera del fetch), mostrarlo
+    if(!S.toast) toast(e.message||'Error al enviar WhatsApp de prueba',true);
   }
 }
 
