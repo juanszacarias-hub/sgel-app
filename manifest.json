@@ -1,0 +1,22 @@
+{
+  "name": "SGEL Guardián Procesal",
+  "short_name": "SGEL",
+  "description": "Sistema de gestión de expedientes laborales · CPL Santa Fe",
+  "start_url": "/sgel-app/",
+  "display": "standalone",
+  "theme_color": "#1d4ed8",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='38' fill='%23ffffff'/%3E%3Ctext x='96' y='118' text-anchor='middle' font-family='system-ui,sans-serif' font-weight='800' font-size='58' letter-spacing='3' fill='%231d4ed8'%3ESGEL%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23ffffff'/%3E%3Ctext x='256' y='315' text-anchor='middle' font-family='system-ui,sans-serif' font-weight='800' font-size='156' letter-spacing='8' fill='%231d4ed8'%3ESGEL%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
