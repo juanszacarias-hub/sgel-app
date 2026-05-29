@@ -251,7 +251,7 @@ async function initApp(){
     const me=await api('GET','/auth/me');
     S.prof.nombre=me.usuario.nombre;S.prof.email=me.usuario.email;
     S._usuarioRol=me.usuario.rol;S._usuarioId=me.usuario.id;S.logueado=true;S._alertaClosed=false;
-    await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos()]);initPush();go('panel');checkFirstTimeTour();
+    await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos(),loadSuscripcion()]);initPush();go('panel');checkFirstTimeTour();
   }catch(e){clearToken();render();}
 }
 // ─────────────────────────────────────────────────────────────────────────────
@@ -592,7 +592,7 @@ function lg(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function ls(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 
 
-let S={view:'landing',logueado:false,db:[],prof:{nombre:'',email:'',whatsapp:'',whatsappApiKey:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}},login:{user:'',pass:'',err:''},chgPw:{a:'',n:'',c:'',err:'',ok:false},calM:HOY.getMonth(),calY:HOY.getFullYear(),expId:null,formExp:false,busq:'',ne:{cuij:'',car:'',rol:'Actor',sede:'Distrito 1',etapa:'',monto:'',montoAcordado:'',notas:'',ciudad:'',trNom:'',trJuez:'',trSec:'',trEmail:'',trTel:'',cliente:'',clienteTel:'',folio:''},ev:{step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:''},rptM:HOY.getMonth(),rptY:HOY.getFullYear(),rptExpId:null,calc:{fecha:ds(HOY),tipo:'',custom:5,desde:'nota',cf:'',tab:'plazos',ibm:'',incap:'',edad:45,factor:'1.44',adj:'20'},hist:{expId:null,fil:'todo',busq:'',_editingLog:null,_editingLogText:''},cr:{paso:1,tipo:'',ref:'',fecha:'',suj:'',expId:'',_cf:''},ref:{busq:'',sec:''},toast:'',tour:false,_tourPaso:0,_alertaClosed:false,_navMas:false,panelDias:14,_modalEscrito:null,_modalCedula:null,_modalConcil:null,_navHist:[],_gq:'',dark:false,_modalNuevaAlerta:false,_fna:{titulo:'',desc:'',fecha:'',expId:''},rpw:{step:1,email:'',code:'',pass:'',conf:'',err:'',mostrarCodigo:''},reg:{nombre:'',email:'',pass:'',conf:'',err:'',terms:false},_adu:{list:[],loaded:false,form:false,sel:null,nuevo:{nombre:'',email:'',pass:'',rol:'abogado',err:''}},_usuarioId:null,_agendaWo:0,_agendaAbog:'',_pushState:'idle',_pushSub:null};
+let S={view:'landing',logueado:false,db:[],suscripcion:{estado:'prueba',dias_prueba_restantes:null,vence:null},prof:{nombre:'',email:'',whatsapp:'',whatsappApiKey:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}},login:{user:'',pass:'',err:''},chgPw:{a:'',n:'',c:'',err:'',ok:false},calM:HOY.getMonth(),calY:HOY.getFullYear(),expId:null,formExp:false,busq:'',ne:{cuij:'',car:'',rol:'Actor',sede:'Distrito 1',etapa:'',monto:'',montoAcordado:'',notas:'',ciudad:'',trNom:'',trJuez:'',trSec:'',trEmail:'',trTel:'',cliente:'',clienteTel:'',folio:''},ev:{step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:''},rptM:HOY.getMonth(),rptY:HOY.getFullYear(),rptExpId:null,calc:{fecha:ds(HOY),tipo:'',custom:5,desde:'nota',cf:'',tab:'plazos',ibm:'',incap:'',edad:45,factor:'1.44',adj:'20'},hist:{expId:null,fil:'todo',busq:'',_editingLog:null,_editingLogText:''},cr:{paso:1,tipo:'',ref:'',fecha:'',suj:'',expId:'',_cf:''},ref:{busq:'',sec:''},toast:'',tour:false,_tourPaso:0,_alertaClosed:false,_navMas:false,panelDias:14,_modalEscrito:null,_modalCedula:null,_modalConcil:null,_navHist:[],_gq:'',dark:false,_modalNuevaAlerta:false,_fna:{titulo:'',desc:'',fecha:'',expId:''},rpw:{step:1,email:'',code:'',pass:'',conf:'',err:'',mostrarCodigo:''},reg:{nombre:'',email:'',pass:'',conf:'',err:'',terms:false},_adu:{list:[],loaded:false,form:false,sel:null,nuevo:{nombre:'',email:'',pass:'',rol:'abogado',err:''}},_usuarioId:null,_agendaWo:0,_agendaAbog:'',_pushState:'idle',_pushSub:null};
 
 function loadState(){}
 function saveDB(){}
@@ -619,6 +619,20 @@ async function loadPreferencias(){
     localStorage.setItem('sgel_prof_local',JSON.stringify(S.prof));
     localStorage.setItem('sgel_dark',S.dark?'1':'0');
   }catch(e){}
+}
+async function loadSuscripcion(){try{const r=await api('GET','/suscripcion/estado');S.suscripcion={estado:r.estado,dias_prueba_restantes:r.dias_prueba_restantes,vence:r.vence};}catch(e){}}
+async function activarSuscripcion(){try{const r=await api('POST','/suscripcion/crear');if(r.url_pago)window.open(r.url_pago,'_blank');}catch(e){toast('Error al iniciar pago: '+e.message,true);}}
+function rBannerSuscripcion(){
+  const s=S.suscripcion;
+  if(!S.logueado)return'';
+  if(s.estado==='prueba'&&s.dias_prueba_restantes!==null&&s.dias_prueba_restantes<=7){
+    const urgente=s.dias_prueba_restantes<=2;
+    return`<div style="background:${urgente?'var(--db)':'var(--wb)'};border-bottom:.5px solid ${urgente?'var(--db2)':'var(--wb2)'};padding:8px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <span style="font-size:12px;font-weight:500;color:${urgente?'var(--ds)':'var(--ws)'}"><i class="ti ti-clock"></i> Período de prueba: ${s.dias_prueba_restantes===0?'vence hoy':s.dias_prueba_restantes===1?'vence mañana':`vence en ${s.dias_prueba_restantes} días`}</span>
+      <button onclick="activarSuscripcion()" class="btn" style="font-size:11px;padding:4px 10px;background:${urgente?'var(--db2)':'var(--wb2)'};border-color:${urgente?'var(--ds)':'var(--ws)'};color:${urgente?'var(--ds)':'var(--ws)'}"><i class="ti ti-credit-card"></i> Suscribirme — $10.000/mes</button>
+    </div>`;
+  }
+  return'';
 }
 function alertasKey(){return'sgel_alertas_manuales_'+(S._usuarioId||'anon');}
 function loadAlertasManuales(){try{return JSON.parse(localStorage.getItem(alertasKey())||'[]');}catch(e){return[];}}
@@ -687,7 +701,7 @@ async function doRegister(){
     const me=await api('GET','/auth/me');
     S.prof.nombre=me.usuario.nombre;S.prof.email=me.usuario.email;
     S._usuarioRol=me.usuario.rol;S._usuarioId=me.usuario.id;S.logueado=true;S._alertaClosed=false;
-    await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos()]);initPush();go('panel');checkFirstTimeTour();
+    await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos(),loadSuscripcion()]);initPush();go('panel');checkFirstTimeTour();
   }catch(e){r.err=e.message||'Error al registrarse. Intentá de nuevo.';render();}
 }
 async function doLogin(){
@@ -698,7 +712,7 @@ async function doLogin(){
     if(!resp.ok)throw new Error(r.error||'Credenciales incorrectas');
     setToken(r.token);S.prof.nombre=r.usuario.nombre;S.prof.email=r.usuario.email;
     S._usuarioRol=r.usuario.rol;S._usuarioId=r.usuario.id;S.logueado=true;S.login.err='';S._alertaClosed=false;
-    await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos()]);initPush();go('panel');checkFirstTimeTour();
+    await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos(),loadSuscripcion()]);initPush();go('panel');checkFirstTimeTour();
   }catch(e){S.login.err=e.message||'Credenciales incorrectas';render();}
 }
 function doLogout(){clearToken();S.logueado=false;S.db=[];S.view='landing';S.login={user:'',pass:'',err:''};render();}
@@ -1255,7 +1269,7 @@ function rCfg(){const n=S.prof.notif||{};return`${rHdr()}<span class="sec">Perfi
     ${(S.prof.feriaExtra||[]).length?`<div><span class="lbl">Días extra configurados (${S.prof.feriaExtra.length})</span><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px">${(S.prof.feriaExtra||[]).sort().map(f=>`<span style="background:var(--wb);border:.5px solid var(--wb2);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--ws);display:flex;align-items:center;gap:4px">${fC(new Date(f+'T12:00:00'))}<button onclick="quitarFeria('${f}')" style="background:none;border:none;cursor:pointer;color:var(--ws);padding:0;font-size:11px;line-height:1">×</button></span>`).join('')}</div></div>`:''}
   </div>
 </div>
-<span class="sec">Seguridad</span><div class="card" style="margin-bottom:12px"><span style="font-size:13px;font-weight:500;display:block;margin-bottom:10px">Cambiar contraseña</span><div style="display:grid;gap:9px"><div><span class="lbl">Contraseña actual</span><input class="inp" type="password" placeholder="••••••••" value="${S.chgPw.a}" oninput="S.chgPw.a=this.value;S.chgPw.ok=false;S.chgPw.err=''"></div><div><span class="lbl">Contraseña nueva</span><input class="inp" type="password" placeholder="Mínimo 6 caracteres" value="${S.chgPw.n}" oninput="S.chgPw.n=this.value;S.chgPw.ok=false;S.chgPw.err=''"></div><div><span class="lbl">Confirmar contraseña nueva</span><input class="inp" type="password" placeholder="Repetí la contraseña nueva" value="${S.chgPw.c}" oninput="S.chgPw.c=this.value;S.chgPw.ok=false;S.chgPw.err=''"></div>${S.chgPw.err?`<div style="background:var(--db);border:.5px solid var(--db2);border-radius:7px;padding:8px 12px;font-size:12px;color:var(--ds)"><i class="ti ti-alert-circle"></i> ${S.chgPw.err}</div>`:''}${S.chgPw.ok?`<div style="background:var(--gb);border:.5px solid var(--gb2);border-radius:7px;padding:8px 12px;font-size:12px;color:var(--gs)"><i class="ti ti-circle-check"></i> Contraseña actualizada correctamente</div>`:''}<button class="bok" onclick="cambiarPassword()"><i class="ti ti-lock"></i> Actualizar contraseña</button></div></div><span class="sec">Datos y backup</span><div class="card" style="margin-bottom:12px"><p style="font-size:12px;color:var(--ts);margin:0 0 12px;line-height:1.6">Export&#xE1; todos tus expedientes, eventos y notas como archivo JSON. Guard&#xE1; el backup en un lugar seguro y us&#xE1;lo para restaurar en caso de p&#xE9;rdida.</p><div style="display:flex;flex-direction:column;gap:8px"><button id="btn-export-backup" class="bok" onclick="exportarBackup()" style="background:var(--gb);border:.5px solid var(--gb2);color:var(--gs)"><i class="ti ti-download"></i><span class="ti-fb">&#x2193;</span> Exportar backup completo</button><input type="file" id="backup-file-input" accept=".json,application/json" style="display:none" onchange="importarBackup(this)"><button id="btn-import-backup" class="btn" onclick="document.getElementById('backup-file-input').click()" style="width:100%;justify-content:center;padding:9px 14px;font-size:13px"><i class="ti ti-upload"></i><span class="ti-fb">&#x2191;</span> Importar backup</button></div></div><span class="sec">Sesión</span><div class="card"><div class="rr"><span>Versión</span><span class="bdg" style="background:var(--ib);color:var(--is)">v0.5 CPL</span></div><div class="rr"><span>Plazos cargados</span><span class="bdg" style="background:var(--pb);color:var(--ps)">${Object.keys(TR).length} tipos</span></div><div style="padding-top:8px"><button class="btn bdng" onclick="doLogout()" style="width:100%;justify-content:center"><i class="ti ti-logout"></i> Cerrar sesión</button></div></div>`}
+<span class="sec">Seguridad</span><div class="card" style="margin-bottom:12px"><span style="font-size:13px;font-weight:500;display:block;margin-bottom:10px">Cambiar contraseña</span><div style="display:grid;gap:9px"><div><span class="lbl">Contraseña actual</span><input class="inp" type="password" placeholder="••••••••" value="${S.chgPw.a}" oninput="S.chgPw.a=this.value;S.chgPw.ok=false;S.chgPw.err=''"></div><div><span class="lbl">Contraseña nueva</span><input class="inp" type="password" placeholder="Mínimo 6 caracteres" value="${S.chgPw.n}" oninput="S.chgPw.n=this.value;S.chgPw.ok=false;S.chgPw.err=''"></div><div><span class="lbl">Confirmar contraseña nueva</span><input class="inp" type="password" placeholder="Repetí la contraseña nueva" value="${S.chgPw.c}" oninput="S.chgPw.c=this.value;S.chgPw.ok=false;S.chgPw.err=''"></div>${S.chgPw.err?`<div style="background:var(--db);border:.5px solid var(--db2);border-radius:7px;padding:8px 12px;font-size:12px;color:var(--ds)"><i class="ti ti-alert-circle"></i> ${S.chgPw.err}</div>`:''}${S.chgPw.ok?`<div style="background:var(--gb);border:.5px solid var(--gb2);border-radius:7px;padding:8px 12px;font-size:12px;color:var(--gs)"><i class="ti ti-circle-check"></i> Contraseña actualizada correctamente</div>`:''}<button class="bok" onclick="cambiarPassword()"><i class="ti ti-lock"></i> Actualizar contraseña</button></div></div><span class="sec">Datos y backup</span><div class="card" style="margin-bottom:12px"><p style="font-size:12px;color:var(--ts);margin:0 0 12px;line-height:1.6">Export&#xE1; todos tus expedientes, eventos y notas como archivo JSON. Guard&#xE1; el backup en un lugar seguro y us&#xE1;lo para restaurar en caso de p&#xE9;rdida.</p><div style="display:flex;flex-direction:column;gap:8px"><button id="btn-export-backup" class="bok" onclick="exportarBackup()" style="background:var(--gb);border:.5px solid var(--gb2);color:var(--gs)"><i class="ti ti-download"></i><span class="ti-fb">&#x2193;</span> Exportar backup completo</button><input type="file" id="backup-file-input" accept=".json,application/json" style="display:none" onchange="importarBackup(this)"><button id="btn-import-backup" class="btn" onclick="document.getElementById('backup-file-input').click()" style="width:100%;justify-content:center;padding:9px 14px;font-size:13px"><i class="ti ti-upload"></i><span class="ti-fb">&#x2191;</span> Importar backup</button></div></div><span class="sec">Suscripción</span><div class="card" style="margin-bottom:12px">${(()=>{const s=S.suscripcion,eb=s.estado==='activa',ep=s.estado==='prueba',ev=s.estado==='vencida'||s.estado==='cancelada';return`<div class="rr"><span style="font-size:13px">Estado</span><span class="bdg" style="background:${eb?'var(--gb)':ep?'var(--wb)':'var(--db)'};color:${eb?'var(--gs)':ep?'var(--ws)':'var(--ds)'}">${eb?'Activa':ep?'En período de prueba':s.estado==='pausada'?'Pausada':'Vencida'}</span></div>${ep&&s.dias_prueba_restantes!==null?`<div class="rr"><span style="font-size:13px;color:var(--ts)">Días de prueba restantes</span><span style="font-size:13px;font-weight:600;color:${s.dias_prueba_restantes<=3?'var(--ds)':s.dias_prueba_restantes<=7?'var(--ws)':'var(--tp)'}">${s.dias_prueba_restantes}</span></div>`:''}<div class="rr"><span style="font-size:13px;color:var(--ts)">Plan</span><span style="font-size:12px;color:var(--ts)">$10.000 ARS / mes</span></div><div style="padding-top:8px"><button onclick="activarSuscripcion()" class="bok" style="${eb?'background:var(--gb);border-color:var(--gb2);color:var(--gs)':''}"><i class="ti ti-credit-card"></i> ${eb?'Gestionar suscripción':'Activar suscripción'}</button></div>`;})()}</div><span class="sec">Sesión</span><div class="card"><div class="rr"><span>Versión</span><span class="bdg" style="background:var(--ib);color:var(--is)">v0.5 CPL</span></div><div class="rr"><span>Plazos cargados</span><span class="bdg" style="background:var(--pb);color:var(--ps)">${Object.keys(TR).length} tipos</span></div><div style="padding-top:8px"><button class="btn bdng" onclick="doLogout()" style="width:100%;justify-content:center"><i class="ti ti-logout"></i> Cerrar sesión</button></div></div>`}
 
 function rEV(){
   const v=S.ev,bk=v.step>1?`<button class="btn" onclick="S.ev.step--;render()" style="padding:5px 10px"><i class="ti ti-arrow-left"></i><span class="ti-fb">←</span></button>`:`<button class="btn" onclick="go('panel')" style="padding:5px 10px"><i class="ti ti-arrow-left"></i><span class="ti-fb">←</span></button>`,pg=`<div style="display:flex;gap:3px;margin-bottom:1.125rem">${[1,2,3,4].map(n=>`<div style="flex:1;height:3px;border-radius:2px;background:${n<=v.step?'var(--ib2)':'var(--bt)'}"></div>`).join('')}</div>`,hd=`${rHdr()}<div style="display:flex;align-items:center;gap:9px;margin-bottom:.875rem">${bk}<p style="font-size:16px;font-weight:600;margin:0">Cargar evento</p><span style="font-size:11px;color:var(--tt);margin-left:auto">Paso ${v.step}/4</span></div>`,op=S.db.map(e=>`<option value="${e.id}"${v.expId===e.id?'selected':''}>${e.car.length>50?e.car.substring(0,50)+'…':e.car}</option>`).join('');
@@ -2426,12 +2440,24 @@ function render(){
     else el.innerHTML=rLanding();
     return;
   }
+  // Pantalla bloqueada si suscripción vencida o cancelada
+  if(S.suscripcion.estado==='vencida'||S.suscripcion.estado==='cancelada'){
+    el.innerHTML=`<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;background:var(--bs)">
+      <div style="font-size:48px;margin-bottom:16px">🔒</div>
+      <h2 style="font-size:20px;font-weight:700;margin:0 0 8px;color:var(--tp)">${S.suscripcion.estado==='cancelada'?'Suscripción cancelada':'Período de prueba vencido'}</h2>
+      <p style="font-size:13px;color:var(--ts);max-width:360px;line-height:1.6;margin:0 0 24px">Para seguir usando SGEL Guardián Procesal activá tu suscripción mensual por <strong>$10.000 ARS/mes</strong>.</p>
+      <button onclick="activarSuscripcion()" class="bok" style="max-width:280px;justify-content:center"><i class="ti ti-credit-card"></i> Activar suscripción</button>
+      <button onclick="doLogout()" class="btn" style="margin-top:10px;max-width:280px;justify-content:center"><i class="ti ti-logout"></i> Cerrar sesión</button>
+    </div>`;
+    return;
+  }
   // Save focused search input before DOM replacement
   const _fa=document.activeElement;
   const _fid=_fa&&_fa.dataset?_fa.dataset.sid:null;
   const _fpos=_fa?_fa.selectionStart:null;
   const v=S.view;
-  if(v==='panel'){const alertaHtml=(!S._alertaClosed&&!S.tour)?rAlertaApertura():'';el.innerHTML=rPanel()+alertaHtml+(S.tour?rTour():'')+(S._modalEscrito?rModalEscrito():'')+(S._modalCedula?rModalCedula():'')+(S._modalConcil?rModalConcil():'');}
+  const _banner=rBannerSuscripcion();
+  if(v==='panel'){const alertaHtml=(!S._alertaClosed&&!S.tour)?rAlertaApertura():'';el.innerHTML=_banner+rPanel()+alertaHtml+(S.tour?rTour():'')+(S._modalEscrito?rModalEscrito():'')+(S._modalCedula?rModalCedula():'')+(S._modalConcil?rModalConcil():'');}
   else if(v==='carga')el.innerHTML=rCarga();
   else if(v==='expedientes'){const alertaHtml=(!S._alertaClosed&&!S.tour)?rAlertaApertura():'';el.innerHTML=rExp()+alertaHtml+(S.tour?rTour():'')+(S._modalEscrito?rModalEscrito():'')+(S._modalCedula?rModalCedula():'')+(S._modalConcil?rModalConcil():'');}
   else if(v==='historial')el.innerHTML=rHist();
