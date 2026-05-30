@@ -616,8 +616,8 @@ async function loadPreferencias(){
     if(p.notif)S.prof.notif=Object.assign({},S.prof.notif,p.notif);
     if(p.dark!==undefined)S.dark=p.dark;
     if(p.nombre)S.prof.nombre=p.nombre;
-    if(p.whatsapp!==undefined)S.prof.whatsapp=p.whatsapp;
-    if(p.whatsapp_apikey!==undefined)S.prof.whatsappApiKey=p.whatsapp_apikey;
+    S.prof.whatsapp=p.whatsapp!==undefined?p.whatsapp:'';
+    S.prof.whatsappApiKey=p.whatsapp_apikey!==undefined?p.whatsapp_apikey:'';
     localStorage.setItem('sgel_prof_local',JSON.stringify(S.prof));
     localStorage.setItem('sgel_dark',S.dark?'1':'0');
   }catch(e){}
@@ -755,7 +755,7 @@ async function doLogin(){
     await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos(),loadSuscripcion()]);initPush();go('panel');checkFirstTimeTour();
   }catch(e){S.login.err=e.message||'Credenciales incorrectas';render();}
 }
-function doLogout(){clearToken();S.logueado=false;S.db=[];S.view='landing';S.login={user:'',pass:'',err:''};render();}
+function doLogout(){clearToken();localStorage.removeItem('sgel_prof_local');S.logueado=false;S.db=[];S.prof={nombre:'',email:'',whatsapp:'',whatsappApiKey:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}};S.view='landing';S.login={user:'',pass:'',err:''};render();}
 
 async function loadConfig(){
   try{
@@ -1479,8 +1479,9 @@ function rTour(){
     <div style="background:${p.bg};border-bottom:.5px solid ${p.bd};padding:1.25rem 1.25rem .875rem">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
         <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:40px;height:40px;border-radius:10px;background:var(--bp);border:.5px solid ${p.bd};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <i class="ti ${p.ico}" style="font-size:20px;color:${p.color}"></i>
+          <div style="width:40px;height:40px;border-radius:10px;background:${p.color};display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;gap:1px">
+            <span style="font-size:14px;font-weight:800;color:#fff;line-height:1">${paso+1}</span>
+            <i class="ti ${p.ico}" style="font-size:11px;color:rgba(255,255,255,.8)"></i>
           </div>
           <div>
             <p style="font-size:10px;font-family:var(--fm);color:${p.color};margin:0;letter-spacing:.08em;text-transform:uppercase">Guía de uso · ${paso+1} de ${pasos.length}</p>
