@@ -245,12 +245,14 @@ async function initApp(){
   const _oauthError=_qp.get('error');
   if(_oauthToken){setToken(decodeURIComponent(_oauthToken));window.history.replaceState({},'',window.location.pathname);}
   if(_oauthError){S.login.err='Error al iniciar sesión con Google. Intentá de nuevo.';render();return;}
+  const _evParam=_qp.get('email_verificado');
+  if(_evParam){window.history.replaceState({},'',window.location.pathname);if(_evParam==='ok')setTimeout(()=>toast('Email verificado correctamente ✓'),500);else if(_evParam==='error')setTimeout(()=>toast('Link de verificación inválido o expirado',true),500);}
   const token=getToken();
   if(!token){render();return;}
   try{
     const me=await api('GET','/auth/me');
     S.prof.nombre=me.usuario.nombre;S.prof.email=me.usuario.email;
-    S._usuarioRol=me.usuario.rol;S._usuarioId=me.usuario.id;S.logueado=true;S._alertaClosed=false;
+    S._usuarioRol=me.usuario.rol;S._usuarioId=me.usuario.id;S._emailVerificado=me.usuario.email_verificado===true;S.logueado=true;S._alertaClosed=false;
     await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos(),loadSuscripcion()]);initPush();go('panel');checkFirstTimeTour();
   }catch(e){clearToken();render();}
 }
@@ -592,7 +594,7 @@ function lg(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function ls(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 
 
-let S={view:'landing',logueado:false,db:[],suscripcion:{estado:'prueba',dias_prueba_restantes:null,vence:null},prof:{nombre:'',email:'',whatsapp:'',whatsappApiKey:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}},login:{user:'',pass:'',err:''},chgPw:{a:'',n:'',c:'',err:'',ok:false},calM:HOY.getMonth(),calY:HOY.getFullYear(),expId:null,formExp:false,busq:'',ne:{cuij:'',car:'',rol:'Actor',sede:'Distrito 1',etapa:'',monto:'',montoAcordado:'',notas:'',ciudad:'',trNom:'',trJuez:'',trSec:'',trEmail:'',trTel:'',cliente:'',clienteTel:'',folio:''},ev:{step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:''},rptM:HOY.getMonth(),rptY:HOY.getFullYear(),rptExpId:null,calc:{fecha:ds(HOY),tipo:'',custom:5,desde:'nota',cf:'',tab:'plazos',ibm:'',incap:'',edad:45,factor:'1.44',adj:'20'},hist:{expId:null,fil:'todo',busq:'',_editingLog:null,_editingLogText:''},cr:{paso:1,tipo:'',ref:'',fecha:'',suj:'',expId:'',_cf:''},ref:{busq:'',sec:''},toast:'',tour:false,_tourPaso:0,_alertaClosed:false,_navMas:false,panelDias:14,_modalEscrito:null,_modalCedula:null,_modalConcil:null,_navHist:[],_gq:'',dark:false,_modalNuevaAlerta:false,_fna:{titulo:'',desc:'',fecha:'',expId:''},rpw:{step:1,email:'',code:'',pass:'',conf:'',err:'',mostrarCodigo:''},reg:{nombre:'',email:'',pass:'',conf:'',err:'',terms:false},_adu:{list:[],loaded:false,form:false,sel:null,nuevo:{nombre:'',email:'',pass:'',rol:'abogado',err:''}},_usuarioId:null,_bienvenida:false,_agendaWo:0,_agendaAbog:'',_pushState:'idle',_pushSub:null};
+let S={view:'landing',logueado:false,db:[],suscripcion:{estado:'prueba',dias_prueba_restantes:null,vence:null},prof:{nombre:'',email:'',whatsapp:'',whatsappApiKey:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}},login:{user:'',pass:'',err:''},chgPw:{a:'',n:'',c:'',err:'',ok:false},calM:HOY.getMonth(),calY:HOY.getFullYear(),expId:null,formExp:false,busq:'',ne:{cuij:'',car:'',rol:'Actor',sede:'Distrito 1',etapa:'',monto:'',montoAcordado:'',notas:'',ciudad:'',trNom:'',trJuez:'',trSec:'',trEmail:'',trTel:'',cliente:'',clienteTel:'',folio:''},ev:{step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:''},rptM:HOY.getMonth(),rptY:HOY.getFullYear(),rptExpId:null,calc:{fecha:ds(HOY),tipo:'',custom:5,desde:'nota',cf:'',tab:'plazos',ibm:'',incap:'',edad:45,factor:'1.44',adj:'20'},hist:{expId:null,fil:'todo',busq:'',_editingLog:null,_editingLogText:''},cr:{paso:1,tipo:'',ref:'',fecha:'',suj:'',expId:'',_cf:''},ref:{busq:'',sec:''},toast:'',tour:false,_tourPaso:0,_alertaClosed:false,_navMas:false,panelDias:14,_modalEscrito:null,_modalCedula:null,_modalConcil:null,_navHist:[],_gq:'',dark:false,_modalNuevaAlerta:false,_fna:{titulo:'',desc:'',fecha:'',expId:''},rpw:{step:1,email:'',code:'',pass:'',conf:'',err:'',mostrarCodigo:''},reg:{nombre:'',email:'',pass:'',conf:'',err:'',terms:false},_adu:{list:[],loaded:false,form:false,sel:null,nuevo:{nombre:'',email:'',pass:'',rol:'abogado',err:''}},_usuarioId:null,_emailVerificado:true,_bienvenida:false,_agendaWo:0,_agendaAbog:'',_pushState:'idle',_pushSub:null};
 
 function loadState(){}
 function saveDB(){}
@@ -622,6 +624,12 @@ async function loadPreferencias(){
 }
 async function loadSuscripcion(){try{const r=await api('GET','/suscripcion/estado');S.suscripcion={estado:r.estado,dias_prueba_restantes:r.dias_prueba_restantes,vence:r.vence};}catch(e){}}
 async function activarSuscripcion(){try{const r=await api('POST','/suscripcion/crear');if(r.url_pago)window.open(r.url_pago,'_blank');}catch(e){toast('Error al iniciar pago: '+e.message,true);}}
+function rBannerEmailVerificacion(){
+  if(!S.logueado||S._emailVerificado)return'';
+  return`<div style="background:var(--wb);border-bottom:.5px solid var(--wb2);padding:8px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <span style="font-size:12px;font-weight:500;color:var(--ws)"><i class="ti ti-mail"></i> Verificá tu email para activar tu cuenta</span>
+  </div>`;
+}
 function rBannerSuscripcion(){
   const s=S.suscripcion;
   if(!S.logueado)return'';
@@ -659,12 +667,12 @@ function rModalBienvenida(){
           <div><strong style="font-size:13px;color:var(--tp)">30 días de prueba gratuita</strong><p style="font-size:12px;color:var(--ts);margin:.2rem 0 0">Explorá todas las funciones sin límites y sin tarjeta de crédito.</p></div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:.75rem">
-          <span style="background:var(--ib);color:var(--is);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:700">2</span>
-          <div><strong style="font-size:13px;color:var(--tp)">+1 mes gratis al suscribirte</strong><p style="font-size:12px;color:var(--ts);margin:.2rem 0 0">Al activar tu suscripción obtenés un mes adicional sin costo. <strong>2 meses gratis en total.</strong></p></div>
+          <span style="background:var(--wb);color:var(--ws);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:700">2</span>
+          <div><strong style="font-size:13px;color:var(--tp)">$10.000 / mes al suscribirte</strong><p style="font-size:12px;color:var(--ts);margin:.2rem 0 0">Precio fijo mensual, sin sorpresas.</p></div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:.75rem">
-          <span style="background:var(--wb);color:var(--ws);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:700">3</span>
-          <div><strong style="font-size:13px;color:var(--tp)">$10.000 / mes desde el 3er mes</strong><p style="font-size:12px;color:var(--ts);margin:.2rem 0 0">Precio fijo mensual. Podés cancelar cuando quieras, sin permanencia.</p></div>
+          <span style="background:var(--ib);color:var(--is);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:700">3</span>
+          <div><strong style="font-size:13px;color:var(--tp)">Cancelá cuando quieras</strong><p style="font-size:12px;color:var(--ts);margin:.2rem 0 0">Sin permanencia mínima ni costos de baja.</p></div>
         </div>
       </div>
       <button onclick="closeBienvenida()" class="bok" style="width:100%;background:linear-gradient(135deg,var(--is) 0%,var(--ps) 100%);color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer">
@@ -732,7 +740,7 @@ async function doRegister(){
     setToken(res.token);
     const me=await api('GET','/auth/me');
     S.prof.nombre=me.usuario.nombre;S.prof.email=me.usuario.email;
-    S._usuarioRol=me.usuario.rol;S._usuarioId=me.usuario.id;S.logueado=true;S._alertaClosed=false;
+    S._usuarioRol=me.usuario.rol;S._usuarioId=me.usuario.id;S._emailVerificado=me.usuario.email_verificado===true;S.logueado=true;S._alertaClosed=false;
     await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos(),loadSuscripcion()]);initPush();go('panel');checkBienvenida();checkFirstTimeTour();
   }catch(e){r.err=e.message||'Error al registrarse. Intentá de nuevo.';render();}
 }
@@ -743,7 +751,7 @@ async function doLogin(){
     const r=await resp.json();
     if(!resp.ok)throw new Error(r.error||'Credenciales incorrectas');
     setToken(r.token);S.prof.nombre=r.usuario.nombre;S.prof.email=r.usuario.email;
-    S._usuarioRol=r.usuario.rol;S._usuarioId=r.usuario.id;S.logueado=true;S.login.err='';S._alertaClosed=false;
+    S._usuarioRol=r.usuario.rol;S._usuarioId=r.usuario.id;S._emailVerificado=r.usuario.email_verificado===true;S.logueado=true;S.login.err='';S._alertaClosed=false;
     await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos(),loadSuscripcion()]);initPush();go('panel');checkFirstTimeTour();
   }catch(e){S.login.err=e.message||'Credenciales incorrectas';render();}
 }
@@ -2488,7 +2496,7 @@ function render(){
   const _fid=_fa&&_fa.dataset?_fa.dataset.sid:null;
   const _fpos=_fa?_fa.selectionStart:null;
   const v=S.view;
-  const _banner=rBannerSuscripcion();
+  const _banner=rBannerEmailVerificacion()+rBannerSuscripcion();
   if(v==='panel'){const alertaHtml=(!S._alertaClosed&&!S.tour)?rAlertaApertura():'';el.innerHTML=_banner+rPanel()+alertaHtml+(S._bienvenida?rModalBienvenida():'')+(S.tour?rTour():'')+(S._modalEscrito?rModalEscrito():'')+(S._modalCedula?rModalCedula():'')+(S._modalConcil?rModalConcil():'');}
   else if(v==='carga')el.innerHTML=rCarga();
   else if(v==='expedientes'){const alertaHtml=(!S._alertaClosed&&!S.tour)?rAlertaApertura():'';el.innerHTML=rExp()+alertaHtml+(S.tour?rTour():'')+(S._modalEscrito?rModalEscrito():'')+(S._modalCedula?rModalCedula():'')+(S._modalConcil?rModalConcil():'');}
