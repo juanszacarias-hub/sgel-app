@@ -255,12 +255,13 @@ async function initApp(){
     const me=await api('GET','/auth/me');
     S.prof.nombre=me.usuario.nombre;S.prof.email=me.usuario.email;
     S._usuarioRol=me.usuario.rol;S._usuarioId=me.usuario.id;S._emailVerificado=me.usuario.email_verificado===true;S.logueado=true;S._alertaClosed=false;
-    await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos(),loadSuscripcion()]);initPush();go('panel');checkFirstTimeTour();
+    await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos(),loadSuscripcion()]);initPush();initFeriadosLocales();go('panel');checkFirstTimeTour();
   }catch(e){clearToken();render();}
 }
 // ─────────────────────────────────────────────────────────────────────────────
 let HOL=new Set(["2026-01-01","2026-02-16","2026-02-17","2026-03-16","2026-03-17","2026-03-24","2026-04-02","2026-04-03","2026-04-30","2026-05-01","2026-05-25","2026-06-15","2026-06-20","2026-07-09","2026-07-17","2026-08-17","2026-10-09","2026-10-12","2026-11-20","2026-11-23","2026-12-08","2026-12-25","2026-12-31"]);
 let HOL_N={"2026-01-01":"Año Nuevo","2026-02-16":"Carnaval","2026-02-17":"Carnaval","2026-03-16":"Feriado puente","2026-03-17":"Feriado puente","2026-03-24":"Día de la Memoria","2026-04-02":"Viernes Santo","2026-04-03":"Veteranos","2026-04-30":"Feriado puente","2026-05-01":"Día del Trabajador","2026-05-25":"Revolución de Mayo","2026-06-15":"Güemes","2026-06-20":"Día de la Bandera","2026-07-09":"Independencia","2026-07-17":"Feriado puente","2026-08-17":"San Martín","2026-10-09":"Feriado puente","2026-10-12":"Diversidad Cultural","2026-11-20":"Soberanía Nacional","2026-11-23":"Feriado puente","2026-12-08":"Inmaculada Concepción","2026-12-25":"Navidad","2026-12-31":"Fin de año"};
+let HOL_LOC=new Set();let HOL_LOC_N={};
 const MES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const HORA_OPTS=['07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00'];
 const HOY=new Date();
@@ -598,7 +599,7 @@ const LC={evento_creado:{bg:"var(--ib)",tx:"var(--is)",bd:"var(--ib2)",ic:"ti-pl
 function lcat(t){return['evento_creado','evento_eliminado'].includes(t)?'evento':['nota_manual','nota_estrategia'].includes(t)?'nota':t==='etapa_cambio'?'etapa':'sistema'}
 
 function ds(d){return new Date(d).toISOString().split('T')[0]}
-function isH(d){return HOL.has(ds(d))}
+function isH(d){const k=ds(d);return HOL.has(k)||HOL_LOC.has(k);}
 function isW(d){const w=new Date(d).getDay();return w===0||w===6}
 function isOff(d){return isW(d)||isH(d)||isFeria(d)}
 function nJD(from){let d=new Date(from);d.setDate(d.getDate()+1);while(isOff(d))d.setDate(d.getDate()+1);return d}
@@ -622,7 +623,7 @@ function lg(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function ls(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 
 
-let S={view:'landing',logueado:false,db:[],suscripcion:{estado:'prueba',dias_prueba_restantes:null,vence:null},prof:{nombre:'',email:'',whatsapp:'',whatsappApiKey:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}},login:{user:'',pass:'',err:'',_showPass:false},chgPw:{a:'',n:'',c:'',err:'',ok:false,_show:false},calM:HOY.getMonth(),calY:HOY.getFullYear(),expId:null,formExp:false,busq:'',ne:{cuij:'',car:'',rol:'Actor',sede:'Distrito 1',etapa:'',monto:'',montoAcordado:'',notas:'',ciudad:'',trNom:'',trJuez:'',trSec:'',trEmail:'',trTel:'',cliente:'',clienteTel:'',folio:''},ev:{step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:'',_audHora:'10:00',_srtDias:''},rptM:HOY.getMonth(),rptY:HOY.getFullYear(),rptExpId:null,calc:{fecha:ds(HOY),tipo:'',custom:5,desde:'nota',cf:'',tab:'plazos',ibm:'',incap:'',edad:45,factor:'1.44',adj:'20'},hist:{expId:null,fil:'todo',busq:'',_editingLog:null,_editingLogText:''},cr:{paso:1,tipo:'',ref:'',fecha:'',suj:'',expId:'',_cf:'',_audOtroDesc:'',_otroDesc:'',_otroDias:'',_audHora:'10:00',_srtDias:''},ref:{busq:'',sec:''},toast:'',tour:false,_tourPaso:0,_alertaClosed:false,_navMas:false,panelDias:14,_modalEscrito:null,_modalCedula:null,_modalConcil:null,_navHist:[],_gq:'',dark:false,_modalNuevaAlerta:false,_statsMontoModal:null,_panelModal:null,_fna:{titulo:'',desc:'',fecha:'',expId:''},rpw:{step:1,email:'',code:'',pass:'',conf:'',err:'',mostrarCodigo:''},reg:{nombre:'',email:'',pass:'',conf:'',err:'',terms:false},_adu:{list:[],loaded:false,form:false,sel:null,nuevo:{nombre:'',email:'',pass:'',rol:'abogado',err:''}},_usuarioId:null,_emailVerificado:true,_bienvenida:false,_agendaWo:0,_agendaAbog:'',_pushState:'idle',_pushSub:null,_calDiaPopup:null,_editExp:null};
+let S={view:'landing',logueado:false,db:[],suscripcion:{estado:'prueba',dias_prueba_restantes:null,vence:null},prof:{nombre:'',email:'',whatsapp:'',whatsappApiKey:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}},login:{user:'',pass:'',err:'',_showPass:false},chgPw:{a:'',n:'',c:'',err:'',ok:false,_show:false},calM:HOY.getMonth(),calY:HOY.getFullYear(),expId:null,formExp:false,busq:'',ne:{cuij:'',car:'',rol:'Actor',sede:'Distrito 1',etapa:'',monto:'',montoAcordado:'',notas:'',ciudad:'',trNom:'',trJuez:'',trSec:'',trEmail:'',trTel:'',cliente:'',clienteTel:'',folio:''},ev:{step:1,tipo:'',expId:'',tr:'',fecha:'',suj:'',desc:'',_cf:'',_audHora:'10:00',_srtDias:''},rptM:HOY.getMonth(),rptY:HOY.getFullYear(),rptExpId:null,calc:{fecha:ds(HOY),tipo:'',custom:5,desde:'nota',cf:'',tab:'plazos',ibm:'',incap:'',edad:45,factor:'1.44',adj:'20'},hist:{expId:null,fil:'todo',busq:'',_editingLog:null,_editingLogText:''},cr:{paso:1,tipo:'',ref:'',fecha:'',suj:'',expId:'',_cf:'',_audOtroDesc:'',_otroDesc:'',_otroDias:'',_audHora:'10:00',_srtDias:''},ref:{busq:'',sec:''},toast:'',tour:false,_tourPaso:0,_alertaClosed:false,_navMas:false,panelDias:14,_modalEscrito:null,_modalCedula:null,_modalConcil:null,_navHist:[],_gq:'',dark:false,_modalNuevaAlerta:false,_statsMontoModal:null,_panelModal:null,_modalFeriadoLocal:false,_ffl:{fecha:'',desc:'',err:''},_fna:{titulo:'',desc:'',fecha:'',expId:''},rpw:{step:1,email:'',code:'',pass:'',conf:'',err:'',mostrarCodigo:''},reg:{nombre:'',email:'',pass:'',conf:'',err:'',terms:false},_adu:{list:[],loaded:false,form:false,sel:null,nuevo:{nombre:'',email:'',pass:'',rol:'abogado',err:''}},_usuarioId:null,_emailVerificado:true,_bienvenida:false,_agendaWo:0,_agendaAbog:'',_pushState:'idle',_pushSub:null,_calDiaPopup:null,_editExp:null};
 
 function loadState(){}
 function saveDB(){}
@@ -668,6 +669,12 @@ function rBannerSuscripcion(){
 function alertasKey(){return'sgel_alertas_manuales_'+(S._usuarioId||'anon');}
 function loadAlertasManuales(){try{return JSON.parse(localStorage.getItem(alertasKey())||'[]');}catch(e){return[];}}
 function saveAlertasManuales(arr){localStorage.setItem(alertasKey(),JSON.stringify(arr));}
+function feriadosLocalKey(){return'sgel_feriados_locales_'+(S._usuarioId||'anon');}
+function loadFeriadosLocales(){try{return JSON.parse(localStorage.getItem(feriadosLocalKey())||'[]');}catch(e){return[];}}
+function saveFeriadosLocales(arr){localStorage.setItem(feriadosLocalKey(),JSON.stringify(arr));}
+function initFeriadosLocales(){HOL_LOC=new Set();HOL_LOC_N={};loadFeriadosLocales().forEach(f=>{HOL_LOC.add(f.fecha);HOL_LOC_N[f.fecha]=f.desc||'Feriado local';});}
+function agregarFeriadoLocal(){const f=S._ffl;if(!f.fecha){f.err='Ingresá una fecha.';render();return;}if(HOL.has(f.fecha)){f.err='Esa fecha ya es feriado nacional.';render();return;}const arr=loadFeriadosLocales();if(arr.find(x=>x.fecha===f.fecha)){f.err='Ya existe un feriado local para esa fecha.';render();return;}arr.push({fecha:f.fecha,desc:f.desc.trim()||'Feriado local'});saveFeriadosLocales(arr);initFeriadosLocales();S._modalFeriadoLocal=false;S._ffl={fecha:'',desc:'',err:''};render();}
+function eliminarFeriadoLocal(fecha){const arr=loadFeriadosLocales().filter(x=>x.fecha!==fecha);saveFeriadosLocales(arr);initFeriadosLocales();render();}
 function crearAlertaManual(){const f=S._fna||{};if(!(f.titulo||'').trim()){toast('El título es obligatorio');return;}if(!f.fecha){toast('La fecha de vencimiento es obligatoria');return;}const arr=loadAlertasManuales();arr.push({id:Date.now(),titulo:f.titulo.trim(),desc:(f.desc||'').trim(),fecha:f.fecha,expId:f.expId||'',ts:Date.now()});saveAlertasManuales(arr);S._modalNuevaAlerta=false;render();toast('Alerta creada');}
 function eliminarAlertaManual(id){const arr=loadAlertasManuales().filter(a=>a.id!==id);saveAlertasManuales(arr);render();}
 function toast(m,err){S.toast=m;S.toastErr=!!err;render();setTimeout(()=>{S.toast='';S.toastErr=false;render()},2500)}
@@ -764,7 +771,7 @@ async function doRegister(){
     const me=await api('GET','/auth/me');
     S.prof.nombre=me.usuario.nombre;S.prof.email=me.usuario.email;
     S._usuarioRol=me.usuario.rol;S._usuarioId=me.usuario.id;S._emailVerificado=me.usuario.email_verificado===true;S.logueado=true;S._alertaClosed=false;
-    await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos(),loadSuscripcion()]);initPush();go('panel');checkBienvenida();checkFirstTimeTour();
+    await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos(),loadSuscripcion()]);initPush();initFeriadosLocales();go('panel');checkBienvenida();checkFirstTimeTour();
   }catch(e){r.err=e.message||'Error al registrarse. Intentá de nuevo.';render();}
 }
 async function doLogin(){
@@ -775,7 +782,7 @@ async function doLogin(){
     if(!resp.ok)throw new Error(r.error||'Credenciales incorrectas');
     setToken(r.token);S.prof.nombre=r.usuario.nombre;S.prof.email=r.usuario.email;
     S._usuarioRol=r.usuario.rol;S._usuarioId=r.usuario.id;S._emailVerificado=r.usuario.email_verificado===true;S.logueado=true;S.login.err='';S._alertaClosed=false;
-    await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos(),loadSuscripcion()]);initPush();go('panel');checkFirstTimeTour();
+    await loadPreferencias();await Promise.all([loadConfig(),loadFeriados(),refreshTodos(),loadSuscripcion()]);initPush();initFeriadosLocales();go('panel');checkFirstTimeTour();
   }catch(e){S.login.err=e.message||'Credenciales incorrectas';render();}
 }
 function doLogout(){clearToken();localStorage.removeItem('sgel_prof_local');S.logueado=false;S.db=[];S.prof={nombre:'',email:'',whatsapp:'',whatsappApiKey:'',ibm:'',ibmFecha:'',feriaExtra:[],feriaAnio:2026,notif:{aud48:true,venc24:true,radar:true,vig7:true,caducidad:true}};S.view='landing';S.login={user:'',pass:'',err:'',_showPass:false};render();}
@@ -1223,6 +1230,30 @@ async function eliminarNota(expId,logId){
   }catch(e){toast('Error: '+e.message);}
 }
 
+function rModalFeriadoLocal(){
+  const f=S._ffl||{fecha:'',desc:'',err:''};
+  const lista=loadFeriadosLocales().sort((a,b)=>a.fecha.localeCompare(b.fecha));
+  return`<div style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:3000;display:flex;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this){S._modalFeriadoLocal=false;S._ffl={fecha:'',desc:'',err:''};render()}">
+  <div class="mob-modal-box" style="background:var(--bp);border-radius:14px;max-width:460px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,.3);max-height:85vh;display:flex;flex-direction:column" onclick="event.stopPropagation()">
+    <div style="padding:1rem 1.25rem;border-bottom:.5px solid var(--bt);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:8px"><i class="ti ti-calendar-plus" style="font-size:18px;color:var(--ds)"></i><p style="font-size:15px;font-weight:700;margin:0">Feriados locales</p></div>
+      <button onclick="S._modalFeriadoLocal=false;S._ffl={fecha:'',desc:'',err:''};render()" style="background:none;border:none;cursor:pointer;color:var(--tt);width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center"><i class="ti ti-x" style="font-size:17px"></i></button>
+    </div>
+    <div style="padding:1rem 1.25rem;overflow-y:auto;flex:1">
+      <p style="font-size:13px;color:var(--ts);margin:0 0 12px">Agregá días inhábiles locales (judiciales, municipales, etc.). Se aplican al motor de plazos igual que los feriados nacionales.</p>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:${f.err?'4px':'14px'}">
+        <label style="font-size:12px;font-weight:600;color:var(--ts)">Fecha</label>
+        <input type="date" value="${f.fecha}" oninput="S._ffl.fecha=this.value;S._ffl.err='';render()" style="padding:9px 12px;border-radius:8px;border:1.5px solid ${f.err&&!f.fecha?'var(--ds)':'var(--bse)'};background:var(--ib);color:var(--tp);font-size:14px">
+        <label style="font-size:12px;font-weight:600;color:var(--ts)">Descripción</label>
+        <input type="text" value="${f.desc}" placeholder="Ej: Día de Esperanza" oninput="S._ffl.desc=this.value" style="padding:9px 12px;border-radius:8px;border:1.5px solid var(--bse);background:var(--ib);color:var(--tp);font-size:14px">
+        ${f.err?`<p style="font-size:12px;color:var(--ds);margin:0">${f.err}</p>`:''}
+        <button onclick="agregarFeriadoLocal()" style="padding:10px;background:var(--is);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600">Agregar feriado</button>
+      </div>
+      ${lista.length?`<span class="sec" style="margin:0 0 8px">Feriados guardados</span>${lista.map(fe=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--ib);border:.5px solid var(--ib2);margin-bottom:5px"><span style="width:10px;height:10px;border-radius:2px;background:${cD('red')};flex-shrink:0"></span><div style="flex:1;min-width:0"><p style="font-size:13px;font-weight:500;margin:0">${fe.desc}</p><p style="font-size:11px;color:var(--ts);margin:1px 0 0">${fC(new Date(fe.fecha+'T12:00:00'))}</p></div><button onclick="eliminarFeriadoLocal('${fe.fecha}')" style="background:none;border:none;cursor:pointer;color:var(--tt);padding:2px 4px;display:flex;align-items:center" title="Eliminar"><i class="ti ti-trash" style="font-size:15px"></i></button></div>`).join('')}`:`<p style="font-size:13px;color:var(--tt);text-align:center;padding:1rem 0">Sin feriados locales guardados</p>`}
+    </div>
+  </div>
+</div>`;
+}
 function rCal(){
   const m=S.calM,a=S.calY,last=new Date(a,m+1,0).getDate(),bd={};aEvs(-90,180).forEach(x=>{if(isNaN(x.date.getTime()))return;const k=ds(x.date);if(!bd[k])bd[k]=[];bd[k].push(x)});
   // Eventos de hoy
@@ -1232,7 +1263,7 @@ function rCal(){
   // Grilla del mes
   let cells='';const sd=(new Date(a,m,1).getDay()+6)%7;
   for(let i=0;i<sd;i++)cells+=`<div style="width:calc(100%/7)"></div>`;
-  for(let d=1;d<=last;d++){const dt=new Date(a,m,d),k=ds(dt),hol=isH(dt),isT=k===ds(HOY),wknd=isW(dt),evs=bd[k]||[];let bg='transparent',tx='var(--tp)',bd2='transparent';const fer=isFeria(dt);if(hol){bg=cB('red');tx=cT('red')}else if(fer){bg='var(--wb)';tx='var(--ws)'}else if(isT){bd2=cBd('blue');bg=cB('blue');tx=cT('blue')}else if(wknd)tx='var(--tt)';cells+=`<div class="cal-cell" style="background:${bg};border:.5px solid ${bd2};cursor:pointer" onclick="S._calDiaPopup='${k}';render()" title="${hol?HOL_N[k]||'Feriado':evs.length?evs.length+' evento'+(evs.length>1?'s':''):''}"><span style="font-size:12px;font-weight:${isT?600:400};color:${tx}">${d}</span>${hol?`<span style="font-size:7px;color:${cT('red')}">feriado</span>`:fer?`<span style="font-size:7px;color:var(--ws)">feria</span>`:''}<div style="display:flex;gap:2px;margin-top:1px">${evs.some(x=>x.color==='green')?`<span style="width:7px;height:7px;border-radius:50%;background:${cD('green')}"></span>`:''}${evs.some(x=>x.color==='orange')?`<span style="width:7px;height:7px;border-radius:50%;background:${cD('orange')}"></span>`:''}${evs.some(x=>x.color==='blue')?`<span style="width:7px;height:7px;border-radius:50%;background:${cD('blue')}"></span>`:''}</div></div>`}
+  for(let d=1;d<=last;d++){const dt=new Date(a,m,d),k=ds(dt),hol=isH(dt),isT=k===ds(HOY),wknd=isW(dt),evs=bd[k]||[];let bg='transparent',tx='var(--tp)',bd2='transparent';const fer=isFeria(dt);if(hol){bg=cB('red');tx=cT('red')}else if(fer){bg='var(--wb)';tx='var(--ws)'}else if(isT){bd2=cBd('blue');bg=cB('blue');tx=cT('blue')}else if(wknd)tx='var(--tt)';cells+=`<div class="cal-cell" style="background:${bg};border:.5px solid ${bd2};cursor:pointer" onclick="S._calDiaPopup='${k}';render()" title="${hol?HOL_N[k]||HOL_LOC_N[k]||'Feriado':evs.length?evs.length+' evento'+(evs.length>1?'s':''):''}"><span style="font-size:12px;font-weight:${isT?600:400};color:${tx}">${d}</span>${hol?`<span style="font-size:7px;color:${cT('red')}">feriado</span>`:fer?`<span style="font-size:7px;color:var(--ws)">feria</span>`:''}<div style="display:flex;gap:2px;margin-top:1px">${evs.some(x=>x.color==='green')?`<span style="width:7px;height:7px;border-radius:50%;background:${cD('green')}"></span>`:''}${evs.some(x=>x.color==='orange')?`<span style="width:7px;height:7px;border-radius:50%;background:${cD('orange')}"></span>`:''}${evs.some(x=>x.color==='blue')?`<span style="width:7px;height:7px;border-radius:50%;background:${cD('blue')}"></span>`:''}</div></div>`}
   const em=aEvs(-90,180).filter(x=>{const dt=new Date(x.date);return dt.getMonth()===m&&dt.getFullYear()===a});
   return`${rHdr()}${hoySection}<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;background:var(--bs);border-radius:12px;padding:10px 12px;border:.5px solid var(--bt)">
   <div style="display:flex;gap:5px">
@@ -1243,9 +1274,12 @@ function rCal(){
     <p style="font-size:20px;font-weight:700;margin:0;color:var(--tp)">${MES[m]}</p>
     <p style="font-size:12px;color:var(--tt);margin:0">${a} · <span onclick="S.calM=HOY.getMonth();S.calY=HOY.getFullYear();render()" style="color:var(--is);cursor:pointer;text-decoration:underline">hoy</span></p>
   </div>
-  <div style="display:flex;gap:5px">
-    <button onclick="S.calM++;if(S.calM>11){S.calM=0;S.calY++}render()" title="Mes siguiente" style="width:42px;height:42px;border-radius:10px;border:2px solid var(--is);background:var(--is);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 2px 8px rgba(29,78,216,.3)"><i class="ti ti-chevron-right" style="font-size:20px"></i><span class="ti-fb" style="font-size:20px">›</span></button>
-    <button onclick="S.calY++;render()" title="Año siguiente" style="width:34px;height:34px;border-radius:8px;border:1px solid var(--bse);background:var(--bp);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--tp)"><i class="ti ti-chevrons-right" style="font-size:16px"></i><span class="ti-fb" style="font-size:14px;font-weight:700">»</span></button>
+  <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">
+    <div style="display:flex;gap:5px">
+      <button onclick="S.calM++;if(S.calM>11){S.calM=0;S.calY++}render()" title="Mes siguiente" style="width:42px;height:42px;border-radius:10px;border:2px solid var(--is);background:var(--is);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 2px 8px rgba(29,78,216,.3)"><i class="ti ti-chevron-right" style="font-size:20px"></i><span class="ti-fb" style="font-size:20px">›</span></button>
+      <button onclick="S.calY++;render()" title="Año siguiente" style="width:34px;height:34px;border-radius:8px;border:1px solid var(--bse);background:var(--bp);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--tp)"><i class="ti ti-chevrons-right" style="font-size:16px"></i><span class="ti-fb" style="font-size:14px;font-weight:700">»</span></button>
+    </div>
+    <button onclick="S._modalFeriadoLocal=true;S._ffl={fecha:'',desc:'',err:''};render()" title="Feriados locales" style="height:28px;padding:0 8px;border-radius:7px;border:1px solid var(--ds);background:transparent;cursor:pointer;display:flex;align-items:center;gap:4px;color:var(--ds);font-size:11px;font-weight:600"><i class="ti ti-calendar-plus" style="font-size:13px"></i>Feriado local</button>
   </div>
 </div><div style="display:flex;margin-bottom:4px">${['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(d=>`<div style="width:calc(100%/7);text-align:center;font-size:10px;font-weight:500;color:var(--tt);padding:3px 0">${d}</div>`).join('')}</div><div style="display:flex;flex-wrap:wrap;margin-bottom:.875rem">${cells}</div><div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:1rem">${['green','orange','blue'].map(c=>`<div style="display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:${cD(c)};display:inline-block"></span><span style="font-size:11px;color:var(--ts)">${blb(c)}</span></div>`).join('')}<div style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:var(--wb);border:.5px solid var(--wb2);display:inline-block"></span><span style="font-size:11px;color:var(--ts)">Feria judicial</span></div></div>${em.length?`<span class="sec">Eventos de ${MES[m]}</span>${em.map(x=>{const horaEm=x.ev.tipo==='audiencia'&&x.ev.fecha&&x.ev.fecha.length>=16?x.ev.fecha.substring(11,16):'';return`<div style="display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;border:.5px solid var(--bt);margin-bottom:5px"><span class="dot" style="background:${cD(x.color)}"></span><div style="flex:1;min-width:0"><p style="font-size:13px;font-weight:500;margin:0">${x.ev.desc||TR[x.ev.tr]?.l}</p><p style="font-size:10px;color:var(--tt);margin:1px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.exp.car}</p></div><p style="font-size:12px;color:var(--ts);margin:0;flex-shrink:0">${fmt(x.date)}${horaEm?' · '+horaEm+'hs':''}</p></div>`}).join('')}`:`<div class="rbox" style="text-align:center;padding:1.5rem"><p style="color:var(--tt)">Sin eventos en ${MES[m]}</p></div>`}`;
 }
@@ -1253,9 +1287,9 @@ function rCalDiaPopup(){
   const k=S._calDiaPopup;if(!k)return'';
   const popupDate=new Date(k+'T12:00:00');
   const allEvsDay=[];aEvs(-90,365).forEach(x=>{if(ds(x.date)===k)allEvsDay.push(x)});
-  const hol=HOL.has(k);const fer=isFeria(popupDate);
+  const hol=HOL.has(k)||HOL_LOC.has(k);const fer=!hol&&isFeria(popupDate);
   const evHtml=allEvsDay.length?allEvsDay.map(x=>{const horaP=x.ev.tipo==='audiencia'&&x.ev.fecha&&x.ev.fecha.length>=16?x.ev.fecha.substring(11,16):'';return`<div style="display:flex;gap:9px;align-items:flex-start;padding:9px 0;border-bottom:.5px solid var(--bt);cursor:pointer" onclick="S._calDiaPopup=null;irAExp('${x.exp.id}')"><span class="dot" style="background:${cD(x.color)};margin-top:4px;flex-shrink:0"></span><div style="flex:1;min-width:0"><div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:3px"><span style="font-size:10px;padding:1px 6px;border-radius:4px;background:${cB(x.color)};color:${cT(x.color)}">${evBlb(x)}</span>${horaP?`<span style="font-size:11px;font-family:var(--fm);font-weight:600;color:${cT(x.color)}">${horaP}hs</span>`:''}</div><p style="font-size:13px;font-weight:500;margin:0">${x.ev.desc||TR[x.ev.tr]?.l}</p><p style="font-size:11px;color:var(--tt);margin:3px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.exp.car}${x.exp.cuij?' · '+x.exp.cuij:''}</p></div><i class="ti ti-chevron-right" style="color:var(--tt);font-size:14px;flex-shrink:0;margin-top:4px"></i></div>`}).join(''):`<p style="color:var(--tt);text-align:center;padding:1rem 0;font-size:13px">Sin eventos este día</p>`;
-  const extraInfo=hol?`<div style="background:var(--db);border:.5px solid var(--db2);border-radius:7px;padding:6px 10px;margin-bottom:10px"><p style="font-size:12px;color:var(--ds);margin:0">🗓 ${HOL_N[k]||'Feriado nacional'}</p></div>`:fer?`<div style="background:var(--wb);border:.5px solid var(--wb2);border-radius:7px;padding:6px 10px;margin-bottom:10px"><p style="font-size:12px;color:var(--ws);margin:0">⚖ Feria judicial</p></div>`:'';
+  const extraInfo=hol?`<div style="background:var(--db);border:.5px solid var(--db2);border-radius:7px;padding:6px 10px;margin-bottom:10px"><p style="font-size:12px;color:var(--ds);margin:0">🗓 ${HOL_N[k]||HOL_LOC_N[k]||'Feriado'}</p></div>`:fer?`<div style="background:var(--wb);border:.5px solid var(--wb2);border-radius:7px;padding:6px 10px;margin-bottom:10px"><p style="font-size:12px;color:var(--ws);margin:0">⚖ Feria judicial</p></div>`:'';
   return`<div style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:3000;display:flex;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this){S._calDiaPopup=null;render()}">
   <div class="mob-modal-box" style="background:var(--bp);border-radius:14px;max-width:460px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,.3)" onclick="event.stopPropagation()">
     <div style="padding:1rem 1.25rem;border-bottom:.5px solid var(--bt);display:flex;align-items:center;justify-content:space-between">
@@ -2677,7 +2711,7 @@ function render(){
   else if(v==='carga')el.innerHTML=rCarga();
   else if(v==='expedientes'){const alertaHtml=(!S._alertaClosed&&!S.tour)?rAlertaApertura():'';el.innerHTML=rExp()+alertaHtml+(S.tour?rTour():'')+(S._modalEscrito?rModalEscrito():'')+(S._modalCedula?rModalCedula():'')+(S._modalConcil?rModalConcil():'')+(S._editExp?rModalEditExp():'');}
   else if(v==='historial')el.innerHTML=rHist();
-  else if(v==='calendario')el.innerHTML=rCal()+(S._calDiaPopup?rCalDiaPopup():'');
+  else if(v==='calendario')el.innerHTML=rCal()+(S._calDiaPopup?rCalDiaPopup():'')+(S._modalFeriadoLocal?rModalFeriadoLocal():'');
   else if(v==='agenda')el.innerHTML=rAgenda();
   else if(v==='alertas')el.innerHTML=rAlrt()+(S._modalNuevaAlerta?rModalNuevaAlerta():'');
   else if(v==='reporte')el.innerHTML=rRpt();
