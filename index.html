@@ -1233,7 +1233,7 @@ async function eliminarNota(expId,logId){
 function rModalFeriadoLocal(){
   const f=S._ffl||{fecha:'',desc:'',err:''};
   const lista=loadFeriadosLocales().sort((a,b)=>a.fecha.localeCompare(b.fecha));
-  return`<div style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:3000;display:flex;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this){S._modalFeriadoLocal=false;S._ffl={fecha:'',desc:'',err:''};render()}">
+  return`<div style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:3000;display:flex;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===event.currentTarget){S._modalFeriadoLocal=false;S._ffl={fecha:'',desc:'',err:''};render()}">
   <div class="mob-modal-box" style="background:var(--bp);border-radius:14px;max-width:460px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,.3);max-height:85vh;display:flex;flex-direction:column" onclick="event.stopPropagation()">
     <div style="padding:1rem 1.25rem;border-bottom:.5px solid var(--bt);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
       <div style="display:flex;align-items:center;gap:8px"><i class="ti ti-calendar-plus" style="font-size:18px;color:var(--ds)"></i><p style="font-size:15px;font-weight:700;margin:0">Feriados locales</p></div>
