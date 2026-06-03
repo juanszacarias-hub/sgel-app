@@ -1421,6 +1421,7 @@ function rEV(){
 }
 
 function go(v){
+  S._alertaClosed=true;
   if(S.logueado&&S.view&&S.view!==v){
     S._navHist=([...S._navHist,S.view]).slice(-10);
   }
